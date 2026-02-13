@@ -9,5 +9,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
     hydrateFromStorage()
   }, [hydrateFromStorage])
 
-  return <BrowserRouter>{children}</BrowserRouter>
+  return <BrowserRouter basename="/wedding-invitation">{children}</BrowserRouter>
 }
