@@ -3,6 +3,18 @@
 @theme {
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Wedding warm earth-tone palette (overrides stone) */
+  --color-stone-50:  #F7F2ED;
+  --color-stone-100: #EDE5DB;
+  --color-stone-200: #DDD0C3;
+  --color-stone-300: #C4AA8C;
+  --color-stone-400: #B09A82;
+  --color-stone-500: #A8907A;
+  --color-stone-600: #8B7560;
+  --color-stone-700: #7A5F3A;
+  --color-stone-800: #5C421E;
+  --color-stone-900: #3D2A10;
 }
 
 @layer base {
@@ -15,4 +27,17 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
   }
+}
+
+@keyframes progress-ring {
+  from {
+    stroke-dashoffset: 50.265;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-progress-ring {
+  animation: progress-ring 5s linear;
 }

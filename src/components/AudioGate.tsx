@@ -28,50 +28,50 @@ export function AudioGate() {
     <AnimatePresence>
       {!gatePassed && (
         <motion.div
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white px-6"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/70 backdrop-blur-md px-6"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
         >
-      <audio
-        ref={audioRef}
-        src={invitationData.audioSrc}
-        loop
-        preload="metadata"
-        playsInline
-      />
-      <motion.div
-        className="text-center max-w-md"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
-        <p className="text-stone-500 text-sm uppercase tracking-widest mb-2">
-          Estás invitado
-        </p>
-        <h1 className="font-heading text-3xl md:text-4xl text-stone-800 mb-4">
-          {groomName} & {brideName}
-        </h1>
-        <p className="text-stone-600 mb-10">
-          Será un día inolvidable y queremos vivirlo con vos.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            type="button"
-            onClick={() => handleEnter(true)}
-            className="px-8 py-3 bg-stone-800 text-white rounded-full font-medium hover:bg-stone-700 transition"
+          <audio
+            ref={audioRef}
+            src={invitationData.audioSrc}
+            loop
+            preload="metadata"
+            playsInline
+          />
+          <motion.div
+            className="text-center max-w-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
-            Ingresar con música
-          </button>
-          <button
-            type="button"
-            onClick={() => handleEnter(false)}
-            className="px-8 py-3 border border-stone-300 text-stone-700 rounded-full font-medium hover:bg-stone-50 transition"
-          >
-            Ingresar sin música
-          </button>
-        </div>
-      </motion.div>
+            <p className="text-stone-500 text-sm uppercase tracking-widest mb-2">
+              Bienvenidos a la invitación de
+            </p>
+            <h1 className="font-heading text-3xl md:text-4xl text-stone-800 mb-4">
+              {groomName} & {brideName}
+            </h1>
+            <p className="text-stone-600 mb-10">
+              La música de fondo es parte de la experiencia
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                type="button"
+                onClick={() => handleEnter(true)}
+                className="px-8 py-3 bg-stone-800 text-white rounded-full font-medium hover:bg-stone-700 transition"
+              >
+                Ingresar con música
+              </button>
+              <button
+                type="button"
+                onClick={() => handleEnter(false)}
+                className="px-8 py-3 border border-stone-300 text-stone-700 rounded-full font-medium hover:bg-stone-50 transition"
+              >
+                Ingresar sin música
+              </button>
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

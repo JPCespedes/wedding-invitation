@@ -1,9 +1,11 @@
+const base = import.meta.env.BASE_URL
+
 export const invitationData = {
   /**
    * Música de fondo al ingresar. Coloca el archivo en public/audio/
    * Ej: cant-help-falling-in-love.mp3
    */
-  audioSrc: '/audio/cant-help-falling-in-love.mp3',
+  audioSrc: `${base}audio/el-poder-de-tu-amor.mp3`,
   couple: {
     groomName: 'Pablo',
     brideName: 'May',
@@ -17,7 +19,7 @@ export const invitationData = {
       title: 'Ceremonia',
       datetimeISO: '2027-01-29T15:00:00',
       venueName: 'Parroquia Santa Ana',
-      address: 'Santa Ana Centro, San Jose',
+      address: 'Santa Ana',
       mapsQuery: "9.9324436,-84.1805954"
     },
     {
@@ -25,17 +27,17 @@ export const invitationData = {
       title: 'Celebración',
       datetimeISO: '2027-01-29T17:30:00',
       venueName: 'El Rodeo Estancia',
-      address: 'San Antonio, Heredia',
+      address: 'Belén',
       mapsQuery: "9.9767325,-84.199894"
     },
   ],
   gallery: [
-    { id: '1', src: '/images/gallery-1.jpg', alt: 'Retrato 1' },
-    { id: '2', src: '/images/gallery-2.jpg', alt: 'Retrato 2' },
-    { id: '3', src: '/images/gallery-3.jpg', alt: 'Retrato 3' },
-    { id: '4', src: '/images/gallery-4.jpg', alt: 'Retrato 4' },
-    { id: '5', src: '/images/gallery-5.jpg', alt: 'Retrato 5' },
-    { id: '6', src: '/images/gallery-6.jpg', alt: 'Retrato 6' },
+    { id: '1', src: `${base}images/gallery-1.jpg`, alt: 'Retrato 1' },
+    { id: '2', src: `${base}images/gallery-2.jpg`, alt: 'Retrato 2' },
+    { id: '3', src: `${base}images/gallery-3.jpg`, alt: 'Retrato 3' },
+    { id: '4', src: `${base}images/gallery-4.jpg`, alt: 'Retrato 4' },
+    { id: '5', src: `${base}images/gallery-5.jpg`, alt: 'Retrato 5' },
+    { id: '6', src: `${base}images/gallery-6.jpg`, alt: 'Retrato 6' },
   ],
   gallerySubtitle:
     'Un minuto, un segundo, un instante que queda en la eternidad',
