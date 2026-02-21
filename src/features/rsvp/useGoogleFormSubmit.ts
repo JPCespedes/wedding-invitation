@@ -1,7 +1,30 @@
 import { supabase } from '../../lib/supabase'
 import type { RsvpFormValues } from './rsvpSchema'
 
-export async function submitRsvp(values: RsvpFormValues): Promise<{ success: boolean; error?: string }> {
+export async function checkExistingRsvp(
+  invitationCode: string,
+): Promise<{ exists: boolean; guestNames?: string[]; error?: string }> {
+  const { data, error } = await supabase
+    .from('rsvp_confirmations')
+    .select('guest_names')
+    .eq('invitation_code', invitationCode)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Supabase check RSVP error:', error)
+    return { exists: false, error: error.message }
+  }
+
+  if (data) {
+    return { exists: true, guestNames: data.guest_names }
+  }
+
+  return { exists: false }
+}
+
+export async function submitRsvp(
+  values: RsvpFormValues,
+): Promise<{ success: boolean; alreadyConfirmed?: boolean; error?: string }> {
   const guestNames = values.names.filter((n) => n.trim())
 
   const { error } = await supabase.from('rsvp_confirmations').insert({
@@ -11,6 +34,9 @@ export async function submitRsvp(values: RsvpFormValues): Promise<{ success: boo
   })
 
   if (error) {
+    if (error.code === '23505') {
+      return { success: false, alreadyConfirmed: true }
+    }
     console.error('Supabase RSVP error:', error)
     return { success: false, error: error.message }
   }

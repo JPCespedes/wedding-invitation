@@ -3,11 +3,11 @@ import { useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, UserMinus, UserPlus, Check, Loader2 } from 'lucide-react'
+import { X, UserMinus, UserPlus, Check, Loader2, CalendarCheck } from 'lucide-react'
 import { useAppStore } from '../../store/useAppStore'
 import { invitationData } from '../../data/invitation'
 import { rsvpSchema, type RsvpFormValues } from './rsvpSchema'
-import { submitRsvp } from './useGoogleFormSubmit'
+import { submitRsvp, checkExistingRsvp } from './useGoogleFormSubmit'
 
 const guestLists = invitationData.guestLists as unknown as Record<
   string,
@@ -21,7 +21,10 @@ export function RsvpModal() {
   const isOpen = openModal === 'rsvp'
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isChecking, setIsChecking] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [alreadyConfirmed, setAlreadyConfirmed] = useState(false)
+  const [confirmedNames, setConfirmedNames] = useState<string[]>([])
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const code = searchParams.get('invitacion')?.toLowerCase().trim()
@@ -49,12 +52,25 @@ export function RsvpModal() {
   const removedGuests = invitationList?.guests.filter((g) => !names.includes(g)) ?? []
 
   useEffect(() => {
-    if (!isOpen || !invitationList?.guests?.length) return
-    setValue('names', [...invitationList.guests])
-    setValue('invitationCode', code ?? '')
+    if (!isOpen || !code) return
+
     setSubmitted(false)
     setSubmitError(null)
-  }, [isOpen, invitationList?.guests, setValue, code])
+    setAlreadyConfirmed(false)
+    setConfirmedNames([])
+
+    setIsChecking(true)
+    checkExistingRsvp(code).then((result) => {
+      setIsChecking(false)
+      if (result.exists) {
+        setAlreadyConfirmed(true)
+        setConfirmedNames(result.guestNames ?? [])
+      } else if (invitationList?.guests?.length) {
+        setValue('names', [...invitationList.guests])
+        setValue('invitationCode', code)
+      }
+    })
+  }, [isOpen, code, invitationList?.guests, setValue])
 
   const removePerson = (index: number) => {
     const current = getValues('names')
@@ -74,6 +90,12 @@ export function RsvpModal() {
 
     setIsSubmitting(false)
 
+    if (result.alreadyConfirmed) {
+      setAlreadyConfirmed(true)
+      setConfirmedNames(values.names)
+      return
+    }
+
     if (result.success) {
       setSubmitted(true)
       setTimeout(() => {
@@ -84,6 +106,187 @@ export function RsvpModal() {
     } else {
       setSubmitError('Hubo un error al enviar. Por favor intentá de nuevo.')
     }
+  }
+
+  const renderContent = () => {
+    if (isChecking) {
+      return (
+        <div className="py-12 flex flex-col items-center">
+          <Loader2 size={32} className="animate-spin text-stone-400 mb-4" />
+          <p className="text-stone-500">Verificando invitación...</p>
+        </div>
+      )
+    }
+
+    if (alreadyConfirmed) {
+      return (
+        <motion.div
+          className="py-8 text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-4">
+            <CalendarCheck className="text-stone-700" size={32} />
+          </div>
+          <h3 className="font-heading text-xl text-stone-800 mb-2">
+            Invitación ya confirmada
+          </h3>
+          <p className="text-stone-600 mb-4">
+            Esta invitación ya fue confirmada anteriormente.
+          </p>
+          {confirmedNames.length > 0 && (
+            <div className="bg-stone-50 rounded-lg p-4 mb-6 text-left max-w-xs mx-auto">
+              <p className="text-xs uppercase text-stone-400 mb-2">Personas confirmadas</p>
+              {confirmedNames.map((name) => (
+                <p key={name} className="text-stone-700 font-medium">{name}</p>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={closeModal}
+            className="py-3 px-8 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition"
+          >
+            Cerrar
+          </button>
+        </motion.div>
+      )
+    }
+
+    if (submitted) {
+      return (
+        <motion.div
+          className="py-12 text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-4">
+            <Check className="text-stone-700" size={32} />
+          </div>
+          <h3 className="font-heading text-xl text-stone-800 mb-2">
+            ¡Confirmado!
+          </h3>
+          <p className="text-stone-600">
+            Gracias por confirmar. ¡Los esperamos!
+          </p>
+        </motion.div>
+      )
+    }
+
+    return (
+      <>
+        <div className="flex justify-between items-center mb-6">
+          <h2 id="rsvp-title" className="text-xl font-heading font-semibold text-stone-800">
+            Confirmar asistencia
+          </h2>
+          <button
+            type="button"
+            onClick={closeModal}
+            className="p-2 rounded-full hover:bg-stone-100 text-stone-500"
+            aria-label="Cerrar"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {!invitationList ? (
+          <div className="py-4">
+            <p className="text-stone-600 text-center">
+              Para confirmar asistencia, entrá con el link que te enviamos en tu invitación.
+            </p>
+            <button
+              type="button"
+              onClick={closeModal}
+              className="w-full mt-6 py-3 px-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition"
+            >
+              Cerrar
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Personas que asisten *
+              </label>
+              <p className="text-xs text-stone-500 mb-2">
+                Quitá a quien no vaya. Solo podés volver a agregar a alguien de la lista.
+              </p>
+              {names.map((name, index) => (
+                <div
+                  key={`${name}-${index}`}
+                  className="flex items-center gap-2 mb-2 py-2.5 px-4 bg-stone-50 rounded-lg border border-stone-100"
+                >
+                  <span className="flex-1 font-medium text-stone-800">{name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removePerson(index)}
+                    className="p-2 rounded-lg text-stone-500 hover:bg-stone-200 transition shrink-0"
+                    aria-label={`Quitar a ${name}`}
+                  >
+                    <UserMinus size={18} />
+                  </button>
+                </div>
+              ))}
+              {removedGuests.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs text-stone-500 mb-2">Agregar persona:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {removedGuests.map((name) => (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => addPerson(name)}
+                        className="inline-flex items-center gap-1.5 py-2 px-3 border border-stone-200 rounded-lg text-sm text-stone-700 hover:bg-stone-100 transition"
+                      >
+                        <UserPlus size={16} />
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {errors.names && (
+                <p className="mt-1 text-sm text-rose-600">{errors.names.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-stone-700 mb-1">
+                Mensaje (opcional)
+              </label>
+              <textarea
+                id="message"
+                {...register('message')}
+                rows={4}
+                className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:ring-2 focus:ring-stone-300 focus:border-stone-400 outline-none transition resize-none"
+                placeholder="Indicá por cada persona: nombre y si tiene alergias o restricciones alimentarias."
+              />
+            </div>
+
+            {submitError && (
+              <p className="text-sm text-rose-600 text-center">{submitError}</p>
+            )}
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-3 px-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  'Confirmar asistencia'
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+      </>
+    )
   }
 
   return (
@@ -107,136 +310,7 @@ export function RsvpModal() {
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           >
-            {submitted ? (
-              <motion.div
-                className="py-12 text-center"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-4">
-                  <Check className="text-stone-700" size={32} />
-                </div>
-                <h3 className="font-heading text-xl text-stone-800 mb-2">
-                  ¡Confirmado!
-                </h3>
-                <p className="text-stone-600">
-                  Gracias por confirmar. ¡Los esperamos!
-                </p>
-              </motion.div>
-            ) : (
-              <>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 id="rsvp-title" className="text-xl font-heading font-semibold text-stone-800">
-                    Confirmar asistencia
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="p-2 rounded-full hover:bg-stone-100 text-stone-500"
-                    aria-label="Cerrar"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-
-                {!invitationList ? (
-                  <div className="py-4">
-                    <p className="text-stone-600 text-center">
-                      Para confirmar asistencia, entrá con el link que te enviamos en tu invitación.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={closeModal}
-                      className="w-full mt-6 py-3 px-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition"
-                    >
-                      Cerrar
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-2">
-                        Personas que asisten *
-                      </label>
-                      <p className="text-xs text-stone-500 mb-2">
-                        Quitá a quien no vaya. Solo podés volver a agregar a alguien de la lista.
-                      </p>
-                      {names.map((name, index) => (
-                        <div
-                          key={`${name}-${index}`}
-                          className="flex items-center gap-2 mb-2 py-2.5 px-4 bg-stone-50 rounded-lg border border-stone-100"
-                        >
-                          <span className="flex-1 font-medium text-stone-800">{name}</span>
-                          <button
-                            type="button"
-                            onClick={() => removePerson(index)}
-                            className="p-2 rounded-lg text-stone-500 hover:bg-stone-200 transition shrink-0"
-                            aria-label={`Quitar a ${name}`}
-                          >
-                            <UserMinus size={18} />
-                          </button>
-                        </div>
-                      ))}
-                      {removedGuests.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs text-stone-500 mb-2">Agregar persona:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {removedGuests.map((name) => (
-                              <button
-                                key={name}
-                                type="button"
-                                onClick={() => addPerson(name)}
-                                className="inline-flex items-center gap-1.5 py-2 px-3 border border-stone-200 rounded-lg text-sm text-stone-700 hover:bg-stone-100 transition"
-                              >
-                                <UserPlus size={16} />
-                                {name}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {errors.names && (
-                        <p className="mt-1 text-sm text-rose-600">{errors.names.message}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label htmlFor="message" className="block text-sm font-medium text-stone-700 mb-1">
-                        Mensaje (opcional)
-                      </label>
-                      <textarea
-                        id="message"
-                        {...register('message')}
-                        rows={4}
-                        className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:ring-2 focus:ring-stone-300 focus:border-stone-400 outline-none transition resize-none"
-                        placeholder="Indicá por cada persona: nombre y si tiene alergias o restricciones alimentarias."
-                      />
-                    </div>
-
-                    {submitError && (
-                      <p className="text-sm text-rose-600 text-center">{submitError}</p>
-                    )}
-
-                    <div className="pt-2">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-3 px-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 size={18} className="animate-spin" />
-                            Enviando...
-                          </>
-                        ) : (
-                          'Confirmar asistencia'
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </>
-            )}
+            {renderContent()}
           </motion.div>
         </>
       )}
