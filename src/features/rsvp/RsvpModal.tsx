@@ -7,7 +7,7 @@ import { X, UserMinus, UserPlus, Check, Loader2, CalendarCheck } from 'lucide-re
 import { useAppStore } from '../../store/useAppStore'
 import { invitationData } from '../../data/invitation'
 import { rsvpSchema, type RsvpFormValues } from './rsvpSchema'
-import { submitRsvp, checkExistingRsvp } from './useGoogleFormSubmit'
+import { submitRsvp, checkExistingRsvp, deleteRsvp } from './useGoogleFormSubmit'
 
 const guestLists = invitationData.guestLists as unknown as Record<
   string,
@@ -142,13 +142,36 @@ export function RsvpModal() {
               ))}
             </div>
           )}
-          <button
-            type="button"
-            onClick={closeModal}
-            className="py-3 px-8 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition"
-          >
-            Cerrar
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="py-3 px-8 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!code) return
+                setIsSubmitting(true)
+                const result = await deleteRsvp(code)
+                setIsSubmitting(false)
+                if (result.success) {
+                  setAlreadyConfirmed(false)
+                  setConfirmedNames([])
+                  if (invitationList?.guests?.length) {
+                    setValue('names', [...invitationList.guests])
+                    setValue('invitationCode', code)
+                  }
+                }
+              }}
+              disabled={isSubmitting}
+              className="py-2 px-4 text-stone-400 text-xs hover:text-stone-600 transition disabled:opacity-60"
+            >
+              {isSubmitting ? 'Eliminando...' : 'Desconfirmar (solo pruebas)'}
+            </button>
+          </div>
         </motion.div>
       )
     }

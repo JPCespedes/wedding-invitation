@@ -44,6 +44,22 @@ export async function submitRsvp(
   return { success: true }
 }
 
+export async function deleteRsvp(
+  invitationCode: string,
+): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase
+    .from('rsvp_confirmations')
+    .delete()
+    .eq('invitation_code', invitationCode)
+
+  if (error) {
+    console.error('Supabase delete RSVP error:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}
+
 export async function submitSongSuggestion(
   songName: string,
   suggestedBy?: string,
