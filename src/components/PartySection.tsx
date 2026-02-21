@@ -1,9 +1,11 @@
-import { motion } from 'framer-motion'
-import { Music, Shirt, Info } from 'lucide-react'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Music, Shirt, Info, X, Loader2, Check } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import { invitationData } from '../data/invitation'
+import { submitSongSuggestion } from '../features/rsvp/useGoogleFormSubmit'
 
-const { party, googleForms } = invitationData
+const { party } = invitationData
 
 function ModalContent({
   title,
@@ -29,12 +31,108 @@ function ModalContent({
   )
 }
 
+function SongModal({ onClose }: { onClose: () => void }) {
+  const [songName, setSongName] = useState('')
+  const [suggestedBy, setSuggestedBy] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!songName.trim()) return
+
+    setIsSubmitting(true)
+    const result = await submitSongSuggestion(songName.trim(), suggestedBy.trim())
+    setIsSubmitting(false)
+
+    if (result.success) {
+      setSubmitted(true)
+      setTimeout(() => {
+        onClose()
+      }, 2000)
+    }
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-heading text-xl text-stone-800">Sugerir canción</h3>
+        <button
+          type="button"
+          onClick={onClose}
+          className="p-2 rounded-full hover:bg-stone-100 text-stone-500"
+          aria-label="Cerrar"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {submitted ? (
+        <motion.div
+          className="py-8 text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <div className="w-14 h-14 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-3">
+            <Check className="text-stone-700" size={28} />
+          </div>
+          <p className="text-stone-700 font-medium">¡Canción agregada!</p>
+        </motion.div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="songName" className="block text-sm font-medium text-stone-700 mb-1">
+              Canción *
+            </label>
+            <input
+              id="songName"
+              type="text"
+              value={songName}
+              onChange={(e) => setSongName(e.target.value)}
+              placeholder="Nombre de la canción - Artista"
+              className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:ring-2 focus:ring-stone-300 focus:border-stone-400 outline-none transition"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="suggestedBy" className="block text-sm font-medium text-stone-700 mb-1">
+              Tu nombre (opcional)
+            </label>
+            <input
+              id="suggestedBy"
+              type="text"
+              value={suggestedBy}
+              onChange={(e) => setSuggestedBy(e.target.value)}
+              placeholder="Tu nombre"
+              className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:ring-2 focus:ring-stone-300 focus:border-stone-400 outline-none transition"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting || !songName.trim()}
+            className="w-full py-3 px-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Enviando...
+              </>
+            ) : (
+              'Enviar sugerencia'
+            )}
+          </button>
+        </form>
+      )}
+    </div>
+  )
+}
+
 export function PartySection() {
   const openModal = useAppStore((s) => s.openModalAction)
   const openModalId = useAppStore((s) => s.openModal)
   const closeModal = useAppStore((s) => s.closeModal)
 
-  const songFormUrl = googleForms.songFormUrl
+  const [showSongModal, setShowSongModal] = useState(false)
 
   return (
     <section id="party" className="py-16 px-6 bg-stone-100">
@@ -68,14 +166,13 @@ export function PartySection() {
                   Música
                 </h3>
                 <p className="text-stone-600 text-sm mb-4">{party.songPrompt}</p>
-                <a
-                  href={songFormUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={() => setShowSongModal(true)}
                   className="inline-block py-2 px-4 border border-stone-200 rounded-lg text-stone-700 text-sm font-medium hover:bg-stone-50"
                 >
                   Sugerir canción
-                </a>
+                </button>
               </div>
             </div>
           </motion.div>
@@ -134,7 +231,30 @@ export function PartySection() {
         </div>
       </div>
 
-      {/* Modales */}
+      {/* Song suggestion modal */}
+      <AnimatePresence>
+        {showSongModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              className="absolute inset-0 bg-black/50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSongModal(false)}
+            />
+            <motion.div
+              className="relative bg-white rounded-2xl shadow-xl max-w-md w-full"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <SongModal onClose={() => setShowSongModal(false)} />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Dress code & tips modals */}
       {openModalId === 'dressCode' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={closeModal} />

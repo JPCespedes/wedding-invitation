@@ -1,22 +1,36 @@
-import { invitationData } from '../../data/invitation'
+import { supabase } from '../../lib/supabase'
 import type { RsvpFormValues } from './rsvpSchema'
 
-const { rsvpFormId, fieldMap } = invitationData.googleForms
+export async function submitRsvp(values: RsvpFormValues): Promise<{ success: boolean; error?: string }> {
+  const guestNames = values.names.filter((n) => n.trim())
 
-/**
- * Construye la URL del Google Form con los valores pre-rellenados vía query params.
- * El usuario es redirigido a esta URL; el Form es la fuente de verdad (Google Sheets).
- */
-export function buildGoogleFormRsvpUrl(values: RsvpFormValues): string {
-  const base = `https://docs.google.com/forms/d/e/${rsvpFormId}/viewform`
-  const params = new URLSearchParams()
-  const namesString = values.names.filter((n) => n.trim()).join(', ')
-  params.set(fieldMap.name, namesString)
-  if (values.message) params.set(fieldMap.message, values.message)
-  return `${base}?${params.toString()}`
+  const { error } = await supabase.from('rsvp_confirmations').insert({
+    invitation_code: values.invitationCode ?? null,
+    guest_names: guestNames,
+    message: values.message || null,
+  })
+
+  if (error) {
+    console.error('Supabase RSVP error:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
 }
 
-export function submitRsvpToGoogleForm(values: RsvpFormValues): void {
-  const url = buildGoogleFormRsvpUrl(values)
-  window.open(url, '_blank', 'noopener,noreferrer')
+export async function submitSongSuggestion(
+  songName: string,
+  suggestedBy?: string,
+): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase.from('song_suggestions').insert({
+    song_name: songName,
+    suggested_by: suggestedBy || null,
+  })
+
+  if (error) {
+    console.error('Supabase song error:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
 }

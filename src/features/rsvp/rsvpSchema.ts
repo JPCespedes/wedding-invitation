@@ -14,6 +14,7 @@ export const rsvpSchema = z.object({
     ),
   attending: z.enum(['Sí', 'No'], { message: 'Elige una opción' }),
   message: z.string().optional(),
+  invitationCode: z.string().optional(),
 })
 
 export type RsvpFormValues = z.infer<typeof rsvpSchema>
