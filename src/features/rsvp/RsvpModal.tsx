@@ -150,27 +150,29 @@ export function RsvpModal() {
             >
               Cerrar
             </button>
-            <button
-              type="button"
-              onClick={async () => {
-                if (!code) return
-                setIsSubmitting(true)
-                const result = await deleteRsvp(code)
-                setIsSubmitting(false)
-                if (result.success) {
-                  setAlreadyConfirmed(false)
-                  setConfirmedNames([])
-                  if (invitationList?.guests?.length) {
-                    setValue('names', [...invitationList.guests])
-                    setValue('invitationCode', code)
+            {code === 'garcia' && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!code) return
+                  setIsSubmitting(true)
+                  const result = await deleteRsvp(code)
+                  setIsSubmitting(false)
+                  if (result.success) {
+                    setAlreadyConfirmed(false)
+                    setConfirmedNames([])
+                    if (invitationList?.guests?.length) {
+                      setValue('names', [...invitationList.guests])
+                      setValue('invitationCode', code)
+                    }
                   }
-                }
-              }}
-              disabled={isSubmitting}
-              className="py-2 px-4 text-stone-400 text-xs hover:text-stone-600 transition disabled:opacity-60"
-            >
-              {isSubmitting ? 'Eliminando...' : 'Desconfirmar (solo pruebas)'}
-            </button>
+                }}
+                disabled={isSubmitting}
+                className="py-2 px-4 text-stone-400 text-xs hover:text-stone-600 transition disabled:opacity-60"
+              >
+                {isSubmitting ? 'Eliminando...' : 'Desconfirmar (solo pruebas)'}
+              </button>
+            )}
           </div>
         </motion.div>
       )
