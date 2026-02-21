@@ -1,18 +1,114 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, UserMinus, UserPlus, Check, Loader2, CalendarCheck } from 'lucide-react'
+import { X, Check, Loader2, CalendarCheck, UserCheck, UserX } from 'lucide-react'
 import { useAppStore } from '../../store/useAppStore'
 import { invitationData } from '../../data/invitation'
-import { rsvpSchema, type RsvpFormValues } from './rsvpSchema'
+import { rsvpSchema, type RsvpFormValues, type GuestEntry } from './rsvpSchema'
 import { submitRsvp, checkExistingRsvp, deleteRsvp } from './useGoogleFormSubmit'
 
 const guestLists = invitationData.guestLists as unknown as Record<
   string,
   { guests: string[] }
 >
+
+function GuestCard({
+  guest,
+  index,
+  onToggle,
+  onMessageChange,
+}: {
+  guest: GuestEntry
+  index: number
+  onToggle: (index: number) => void
+  onMessageChange: (index: number, value: string) => void
+}) {
+  return (
+    <motion.div
+      layout
+      className={`rounded-xl border p-4 transition-colors ${
+        guest.attending
+          ? 'bg-stone-50 border-stone-200'
+          : 'bg-white border-stone-100 opacity-60'
+      }`}
+    >
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <span className="font-medium text-stone-800">{guest.name}</span>
+        <button
+          type="button"
+          onClick={() => onToggle(index)}
+          className={`flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium transition-colors ${
+            guest.attending
+              ? 'bg-stone-700 text-white'
+              : 'bg-stone-200 text-stone-500'
+          }`}
+        >
+          {guest.attending ? (
+            <>
+              <UserCheck size={14} />
+              Asiste
+            </>
+          ) : (
+            <>
+              <UserX size={14} />
+              No asiste
+            </>
+          )}
+        </button>
+      </div>
+
+      {guest.attending && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <input
+            type="text"
+            value={guest.message ?? ''}
+            onChange={(e) => onMessageChange(index, e.target.value)}
+            placeholder="Alergias o restricciones alimentarias"
+            className="w-full mt-2 px-3 py-2 text-sm border border-stone-200 rounded-lg focus:ring-2 focus:ring-stone-300 focus:border-stone-400 outline-none transition"
+          />
+        </motion.div>
+      )}
+    </motion.div>
+  )
+}
+
+function ConfirmedGuestList({ guests }: { guests: GuestEntry[] }) {
+  const attending = guests.filter((g) => g.attending)
+  const notAttending = guests.filter((g) => !g.attending)
+
+  return (
+    <div className="text-left max-w-xs mx-auto space-y-3">
+      {attending.length > 0 && (
+        <div className="bg-stone-50 rounded-lg p-4">
+          <p className="text-xs uppercase text-stone-400 mb-2">Asisten</p>
+          {attending.map((g) => (
+            <div key={g.name} className="mb-1">
+              <p className="text-stone-700 font-medium">{g.name}</p>
+              {g.message && (
+                <p className="text-stone-500 text-xs">{g.message}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {notAttending.length > 0 && (
+        <div className="bg-white rounded-lg p-4 border border-stone-100">
+          <p className="text-xs uppercase text-stone-400 mb-2">No asisten</p>
+          {notAttending.map((g) => (
+            <p key={g.name} className="text-stone-400 font-medium">{g.name}</p>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function RsvpModal() {
   const [searchParams] = useSearchParams()
@@ -24,32 +120,34 @@ export function RsvpModal() {
   const [isChecking, setIsChecking] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [alreadyConfirmed, setAlreadyConfirmed] = useState(false)
-  const [confirmedNames, setConfirmedNames] = useState<string[]>([])
+  const [confirmedGuests, setConfirmedGuests] = useState<GuestEntry[]>([])
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const code = searchParams.get('invitacion')?.toLowerCase().trim()
   const invitationList = code ? guestLists[code] : null
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-    reset,
-    setValue,
-    getValues,
-  } = useForm<RsvpFormValues>({
+  const { handleSubmit, control, setValue, watch, reset } = useForm<RsvpFormValues>({
     resolver: zodResolver(rsvpSchema),
     defaultValues: {
-      names: [],
-      attending: 'Sí',
-      message: '',
+      guests: [],
       invitationCode: code ?? '',
     },
   })
 
-  const names = watch('names') ?? []
-  const removedGuests = invitationList?.guests.filter((g) => !names.includes(g)) ?? []
+  const { fields } = useFieldArray({ control, name: 'guests' })
+  const guests = watch('guests')
+
+  const toggleAttending = (index: number) => {
+    const current = guests[index]
+    setValue(`guests.${index}.attending`, !current.attending)
+    if (current.attending) {
+      setValue(`guests.${index}.message`, '')
+    }
+  }
+
+  const updateMessage = (index: number, value: string) => {
+    setValue(`guests.${index}.message`, value)
+  }
 
   useEffect(() => {
     if (!isOpen || !code) return
@@ -57,49 +155,43 @@ export function RsvpModal() {
     setSubmitted(false)
     setSubmitError(null)
     setAlreadyConfirmed(false)
-    setConfirmedNames([])
+    setConfirmedGuests([])
 
     setIsChecking(true)
     checkExistingRsvp(code).then((result) => {
       setIsChecking(false)
-      if (result.exists) {
+      if (result.exists && result.guests) {
         setAlreadyConfirmed(true)
-        setConfirmedNames(result.guestNames ?? [])
+        setConfirmedGuests(result.guests)
       } else if (invitationList?.guests?.length) {
-        setValue('names', [...invitationList.guests])
+        const initial: GuestEntry[] = invitationList.guests.map((name) => ({
+          name,
+          attending: true,
+          message: '',
+        }))
+        setValue('guests', initial)
         setValue('invitationCode', code)
       }
     })
   }, [isOpen, code, invitationList?.guests, setValue])
-
-  const removePerson = (index: number) => {
-    const current = getValues('names')
-    const next = current.filter((_, i) => i !== index)
-    setValue('names', next)
-  }
-
-  const addPerson = (name: string) => {
-    setValue('names', [...getValues('names'), name])
-  }
 
   const onSubmit = async (values: RsvpFormValues) => {
     setIsSubmitting(true)
     setSubmitError(null)
 
     const result = await submitRsvp(values)
-
     setIsSubmitting(false)
 
     if (result.alreadyConfirmed) {
       setAlreadyConfirmed(true)
-      setConfirmedNames(values.names)
+      setConfirmedGuests(values.guests)
       return
     }
 
     if (result.success) {
       setSubmitted(true)
       setTimeout(() => {
-        reset({ names: [], attending: 'Sí', message: '', invitationCode: '' })
+        reset({ guests: [], invitationCode: '' })
         setSubmitted(false)
         closeModal()
       }, 2500)
@@ -107,6 +199,8 @@ export function RsvpModal() {
       setSubmitError('Hubo un error al enviar. Por favor intentá de nuevo.')
     }
   }
+
+  const attendingCount = guests.filter((g) => g.attending).length
 
   const renderContent = () => {
     if (isChecking) {
@@ -134,15 +228,8 @@ export function RsvpModal() {
           <p className="text-stone-600 mb-4">
             Esta invitación ya fue confirmada anteriormente.
           </p>
-          {confirmedNames.length > 0 && (
-            <div className="bg-stone-50 rounded-lg p-4 mb-6 text-left max-w-xs mx-auto">
-              <p className="text-xs uppercase text-stone-400 mb-2">Personas confirmadas</p>
-              {confirmedNames.map((name) => (
-                <p key={name} className="text-stone-700 font-medium">{name}</p>
-              ))}
-            </div>
-          )}
-          <div className="flex flex-col gap-2">
+          <ConfirmedGuestList guests={confirmedGuests} />
+          <div className="flex flex-col gap-2 mt-6">
             <button
               type="button"
               onClick={closeModal}
@@ -160,9 +247,14 @@ export function RsvpModal() {
                   setIsSubmitting(false)
                   if (result.success) {
                     setAlreadyConfirmed(false)
-                    setConfirmedNames([])
+                    setConfirmedGuests([])
                     if (invitationList?.guests?.length) {
-                      setValue('names', [...invitationList.guests])
+                      const initial: GuestEntry[] = invitationList.guests.map((name) => ({
+                        name,
+                        attending: true,
+                        message: '',
+                      }))
+                      setValue('guests', initial)
                       setValue('invitationCode', code)
                     }
                   }
@@ -228,64 +320,25 @@ export function RsvpModal() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
-                Personas que asisten *
-              </label>
-              <p className="text-xs text-stone-500 mb-2">
-                Quitá a quien no vaya. Solo podés volver a agregar a alguien de la lista.
-              </p>
-              {names.map((name, index) => (
-                <div
-                  key={`${name}-${index}`}
-                  className="flex items-center gap-2 mb-2 py-2.5 px-4 bg-stone-50 rounded-lg border border-stone-100"
-                >
-                  <span className="flex-1 font-medium text-stone-800">{name}</span>
-                  <button
-                    type="button"
-                    onClick={() => removePerson(index)}
-                    className="p-2 rounded-lg text-stone-500 hover:bg-stone-200 transition shrink-0"
-                    aria-label={`Quitar a ${name}`}
-                  >
-                    <UserMinus size={18} />
-                  </button>
-                </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+            <p className="text-xs text-stone-500 mb-1">
+              Indicá quién asiste y dejá un mensaje individual si es necesario.
+            </p>
+
+            <div className="space-y-3">
+              {fields.map((field, index) => (
+                <GuestCard
+                  key={field.id}
+                  guest={guests[index]}
+                  index={index}
+                  onToggle={toggleAttending}
+                  onMessageChange={updateMessage}
+                />
               ))}
-              {removedGuests.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-xs text-stone-500 mb-2">Agregar persona:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {removedGuests.map((name) => (
-                      <button
-                        key={name}
-                        type="button"
-                        onClick={() => addPerson(name)}
-                        className="inline-flex items-center gap-1.5 py-2 px-3 border border-stone-200 rounded-lg text-sm text-stone-700 hover:bg-stone-100 transition"
-                      >
-                        <UserPlus size={16} />
-                        {name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {errors.names && (
-                <p className="mt-1 text-sm text-rose-600">{errors.names.message}</p>
-              )}
             </div>
 
-            <div>
-              <label htmlFor="message" className="block text-sm font-medium text-stone-700 mb-1">
-                Mensaje (opcional)
-              </label>
-              <textarea
-                id="message"
-                {...register('message')}
-                rows={4}
-                className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:ring-2 focus:ring-stone-300 focus:border-stone-400 outline-none transition resize-none"
-                placeholder="Indicá por cada persona: nombre y si tiene alergias o restricciones alimentarias."
-              />
+            <div className="text-center text-xs text-stone-400 pt-1">
+              {attendingCount} de {guests.length} persona{guests.length !== 1 ? 's' : ''} asiste{attendingCount !== 1 ? 'n' : ''}
             </div>
 
             {submitError && (

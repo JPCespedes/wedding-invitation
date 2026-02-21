@@ -9,6 +9,8 @@ import { Footer } from '../components/Footer'
 import { AudioGate } from '../components/AudioGate'
 import { AudioControl } from '../components/AudioControl'
 import { RsvpModal } from '../features/rsvp/RsvpModal'
+import { AccommodationSection } from '../components/AccommodationSection'
+import { SectionDivider } from '../components/SectionDivider'
 import { invitationData } from '../data/invitation'
 
 export function InvitationPage() {
@@ -27,9 +29,10 @@ export function InvitationPage() {
             <div className="max-w-2xl mx-auto text-center mb-12">
               <motion.h2
                 className="font-heading text-2xl md:text-3xl text-stone-800"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
               >
                 Será un día inolvidable y queremos vivirlo con vos.
               </motion.h2>
@@ -40,7 +43,10 @@ export function InvitationPage() {
               ))}
             </div>
           </section>
+          <AccommodationSection />
+          <SectionDivider className="bg-stone-50" />
           <Gallery />
+          <SectionDivider className="bg-white" />
           <PartySection />
           <Footer />
         </div>

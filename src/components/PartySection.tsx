@@ -1,9 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Music, Shirt, Info, X, Loader2, Check } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import { invitationData } from '../data/invitation'
 import { submitSongSuggestion } from '../features/rsvp/useGoogleFormSubmit'
+
+function useBodyScrollLock(locked: boolean) {
+  useEffect(() => {
+    if (!locked) return
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = original }
+  }, [locked])
+}
 
 const { party } = invitationData
 
@@ -134,14 +143,17 @@ export function PartySection() {
 
   const [showSongModal, setShowSongModal] = useState(false)
 
+  useBodyScrollLock(openModalId === 'dressCode' || openModalId === 'tips' || showSongModal)
+
   return (
-    <section id="party" className="py-16 px-6 bg-stone-100">
+    <section id="party" className="py-16 px-6 bg-white">
       <div className="max-w-6xl mx-auto">
         <motion.div
           className="text-center mb-12"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
         >
           <h2 className="font-heading text-2xl md:text-3xl text-stone-800 mb-4">
             Fiesta
@@ -154,10 +166,11 @@ export function PartySection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <motion.div
-            className="bg-white rounded-xl shadow-sm border border-stone-100 p-6"
-            initial={{ opacity: 0, y: 16 }}
+            className="bg-stone-50 rounded-xl shadow-sm border border-stone-100 p-6"
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: '-30px' }}
+            transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0 }}
           >
             <div className="flex items-start gap-4">
               <Music className="shrink-0 text-stone-400 mt-1" size={22} />
@@ -178,10 +191,11 @@ export function PartySection() {
           </motion.div>
 
           <motion.div
-            className="bg-white rounded-xl shadow-sm border border-stone-100 p-6"
-            initial={{ opacity: 0, y: 16 }}
+            className="bg-stone-50 rounded-xl shadow-sm border border-stone-100 p-6"
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: '-30px' }}
+            transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0.1 }}
           >
             <div className="flex items-start gap-4">
               <Shirt className="shrink-0 text-stone-400 mt-1" size={22} />
@@ -204,10 +218,11 @@ export function PartySection() {
           </motion.div>
 
           <motion.div
-            className="bg-white rounded-xl shadow-sm border border-stone-100 p-6"
-            initial={{ opacity: 0, y: 16 }}
+            className="bg-stone-50 rounded-xl shadow-sm border border-stone-100 p-6"
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: '-30px' }}
+            transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0.2 }}
           >
             <div className="flex items-start gap-4">
               <Info className="shrink-0 text-stone-400 mt-1" size={22} />
@@ -259,13 +274,97 @@ export function PartySection() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
           <motion.div
-            className="relative bg-white rounded-2xl shadow-xl max-w-md w-full"
+            className="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <ModalContent title="Dress Code" onClose={closeModal}>
-              {party.dressCodeLong}
-            </ModalContent>
+            <div className="sticky top-0 z-10 bg-white rounded-t-2xl border-b border-stone-100 px-6 py-4 flex justify-between items-center shrink-0">
+              <h3 className="font-heading text-xl text-stone-800">Dress Code</h3>
+              <button
+                type="button"
+                onClick={closeModal}
+                className="p-2 rounded-full hover:bg-stone-100 text-stone-500"
+                aria-label="Cerrar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+
+              <p className="text-stone-600 text-sm mb-6">{party.dressCodeLong}</p>
+
+              <div className="mb-6">
+                <h4 className="font-heading text-sm uppercase tracking-wide text-stone-500 mb-3">
+                  Paleta de colores
+                </h4>
+                <div className="flex gap-2 justify-center">
+                  {['#F7F2ED', '#EDE5DB', '#DDD0C3', '#C4AA8C', '#B09A82', '#8B7560', '#7A5F3A'].map((color) => (
+                    <div
+                      key={color}
+                      className="w-10 h-10 rounded-full border border-stone-200 shadow-sm"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <p className="text-stone-400 text-xs text-center mt-2 italic">
+                  Tonos neutros, cálidos y tierra
+                </p>
+              </div>
+
+              <div className="mb-6">
+                <h4 className="font-heading text-sm uppercase tracking-wide text-stone-500 mb-3">
+                  Mujeres
+                </h4>
+                <div className="grid grid-cols-3 gap-2">
+                  <img
+                    src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=300&h=400&fit=crop"
+                    alt="Vestido elegante 1"
+                    className="w-full aspect-[3/4] object-cover rounded-lg"
+                  />
+                  <img
+                    src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=400&fit=crop"
+                    alt="Vestido elegante 2"
+                    className="w-full aspect-[3/4] object-cover rounded-lg"
+                  />
+                  <img
+                    src="https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=300&h=400&fit=crop"
+                    alt="Vestido elegante 3"
+                    className="w-full aspect-[3/4] object-cover rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h4 className="font-heading text-sm uppercase tracking-wide text-stone-500 mb-3">
+                  Hombres
+                </h4>
+                <div className="grid grid-cols-3 gap-2">
+                  <img
+                    src="https://images.unsplash.com/photo-1507679799987-c73b4177fef0?w=300&h=400&fit=crop"
+                    alt="Traje elegante 1"
+                    className="w-full aspect-[3/4] object-cover rounded-lg"
+                  />
+                  <img
+                    src="https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=300&h=400&fit=crop"
+                    alt="Traje elegante 2"
+                    className="w-full aspect-[3/4] object-cover rounded-lg"
+                  />
+                  <img
+                    src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300&h=400&fit=crop"
+                    alt="Traje elegante 3"
+                    className="w-full aspect-[3/4] object-cover rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeModal}
+                className="w-full py-2.5 px-4 bg-stone-800 text-white rounded-lg text-sm hover:bg-stone-700"
+              >
+                Cerrar
+              </button>
+            </div>
           </motion.div>
         </div>
       )}
@@ -278,7 +377,14 @@ export function PartySection() {
             animate={{ opacity: 1, scale: 1 }}
           >
             <ModalContent title="Tips y Notas" onClose={closeModal}>
-              {party.tips}
+              <ul className="space-y-3 text-stone-600 text-sm list-none">
+                {party.tips.map((tip, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-stone-400 mt-0.5 shrink-0">•</span>
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
             </ModalContent>
           </motion.div>
         </div>

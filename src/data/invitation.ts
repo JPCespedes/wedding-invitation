@@ -41,11 +41,32 @@ export const invitationData = {
   ],
   gallerySubtitle:
     'Un minuto, un segundo, un instante que queda en la eternidad',
+  accommodation: {
+    hotelName: 'Hotel El Rodeo',
+    description:
+      'El lugar de nuestra celebración cuenta con un hotel boutique donde podrás hospedarte con un descuento especial por ser nuestro invitado.',
+    discount: 'Mencioná que venís a la boda de Pablo & May para obtener una tarifa preferencial.',
+    phone: '+506 2293-3909',
+    email: 'info@elrodeohotel.com',
+    bookingUrl: 'https://elrodeohotel.com/rooms.html',
+    address: 'Radial Belén-Santa Ana, Belén, Heredia',
+    rooms: [
+      { name: 'Standard', description: 'Acogedora habitación con pisos de madera y ambiente cálido.' },
+      { name: 'Deluxe', description: 'Espaciosa y luminosa, con acabados en madera.' },
+      { name: 'Jr. Suite', description: 'Dos camas queen, ideal para familias.' },
+      { name: 'Suite', description: 'Romántica con cama king, tina y sala de estar.' },
+    ],
+  },
   party: {
     dressCodeShort: 'Una orientación para tu vestuario',
     dressCodeLong:
       'Elegante casual. Preferimos tonos claros y neutros. Evitar deportivo.',
-    tips: 'Estacionamiento disponible en el lugar. La ceremonia comenzará puntualmente. Después de la ceremonia los esperamos en el salón para el brindis y la cena.',
+    tips: [
+      'Amamos a los pequeños de la familia, pero la celebración será exclusivamente para adultos. ¡Los niños son bienvenidos en la ceremonia!',
+      'Contamos con servicio de descorche, así que si querés llevar tu bebida favorita para brindar, ¡adelante!',
+      'El lugar dispone de estacionamiento para tu comodidad.',
+      'El venue cuenta con un hotel boutique donde podrías hospedarte. ¡Consultá por tarifas especiales!',
+    ],
     songPrompt:
       '¿Cuál es la canción que no debe faltar en la PlayList de la fiesta?',
   },

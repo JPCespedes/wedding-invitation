@@ -40,11 +40,11 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
 
   return (
     <motion.article
-      className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 sm:p-8 w-full"
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.1 }}
+      className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 sm:p-8 w-full flex flex-col"
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ type: 'spring', stiffness: 150, damping: 20, delay: index * 0.15 }}
     >
       <h3 className="font-heading text-xl text-stone-800 mb-6">{event.title}</h3>
 
@@ -75,7 +75,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col sm:flex-row gap-3">
+      <div className="mt-auto pt-8 flex flex-col sm:flex-row gap-3">
         {event.id === 'celebracion' && (
           <button
             type="button"

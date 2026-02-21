@@ -74,13 +74,14 @@ export function Gallery() {
   }
 
   return (
-    <section id="gallery" className="py-16 bg-white overflow-hidden">
+    <section id="gallery" className="py-16 bg-stone-50 overflow-hidden">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           className="text-center mb-12"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
         >
           <h2 className="font-heading text-2xl md:text-3xl text-stone-800 mb-2">
             Retratos de Nuestro Amor

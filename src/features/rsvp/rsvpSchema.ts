@@ -1,20 +1,15 @@
 import { z } from 'zod'
 
-export const rsvpSchema = z.object({
-  names: z
-    .array(z.string())
-    .min(1, 'Indicá al menos una persona')
-    .refine(
-      (arr) => arr.some((s) => s.trim().length >= 2),
-      'Al menos un nombre con 2 caracteres o más'
-    )
-    .refine(
-      (arr) => arr.every((s) => !s.trim() || s.trim().length >= 2),
-      'Cada nombre debe tener al menos 2 caracteres'
-    ),
-  attending: z.enum(['Sí', 'No'], { message: 'Elige una opción' }),
+export const guestSchema = z.object({
+  name: z.string().min(2, 'Al menos 2 caracteres'),
+  attending: z.boolean(),
   message: z.string().optional(),
+})
+
+export const rsvpSchema = z.object({
+  guests: z.array(guestSchema).min(1, 'Debe haber al menos un invitado'),
   invitationCode: z.string().optional(),
 })
 
+export type GuestEntry = z.infer<typeof guestSchema>
 export type RsvpFormValues = z.infer<typeof rsvpSchema>
