@@ -1,18 +1,11 @@
-import { motion } from 'framer-motion'
-import { Hotel, Phone, Mail, ExternalLink } from 'lucide-react'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Hotel, Phone, Mail, ExternalLink, Ticket, ChevronDown } from 'lucide-react'
 import { invitationData } from '../data/invitation'
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { type: 'spring' as const, stiffness: 150, damping: 20, delay: i * 0.08 },
-  }),
-}
 
 export function AccommodationSection() {
   const { accommodation } = invitationData
+  const [showRates, setShowRates] = useState(false)
 
   return (
     <section id="accommodation" className="py-16 px-6 bg-white border-t border-stone-100">
@@ -34,7 +27,7 @@ export function AccommodationSection() {
         </motion.div>
 
         <motion.div
-          className="bg-stone-50 border border-stone-200 rounded-2xl p-6 sm:p-8 mb-8"
+          className="bg-stone-50 border border-stone-200 rounded-2xl p-6 sm:p-8"
           initial={{ opacity: 0, y: 30, scale: 0.97 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true }}
@@ -60,30 +53,94 @@ export function AccommodationSection() {
             </motion.a>
           </div>
 
-          <div className="bg-stone-100/80 rounded-xl p-4 mb-6">
-            <p className="text-stone-700 text-sm font-medium">
-              {accommodation.discount}
-            </p>
+          {/* Coupon */}
+          <div className="bg-stone-800 text-white rounded-xl p-4 mb-6 flex items-start gap-3">
+            <Ticket size={20} className="shrink-0 mt-0.5 text-stone-300" />
+            <div>
+              <p className="text-sm font-medium mb-1">
+                Cupón de descuento:{' '}
+                <span className="font-mono tracking-wider bg-white/15 px-2 py-0.5 rounded">
+                  {accommodation.coupon}
+                </span>
+              </p>
+              <p className="text-stone-300 text-xs">{accommodation.couponNote}</p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {accommodation.rooms.map((room, i) => (
-              <motion.div
-                key={room.name}
-                className="bg-white rounded-xl border border-stone-100 p-4 text-center"
-                custom={i}
-                variants={cardVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
+          {/* Amenities */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {accommodation.amenities.map((amenity) => (
+              <span
+                key={amenity}
+                className="text-xs bg-white border border-stone-200 text-stone-600 rounded-full px-3 py-1"
               >
-                <p className="font-heading text-stone-800 text-sm mb-1">{room.name}</p>
-                <p className="text-stone-500 text-xs leading-relaxed">{room.description}</p>
-              </motion.div>
+                {amenity}
+              </span>
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mt-6 pt-6 border-t border-stone-200">
+          {/* Expandable rates */}
+          <div className="border border-stone-200 rounded-xl overflow-hidden mb-6">
+            <button
+              type="button"
+              onClick={() => setShowRates(!showRates)}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-white hover:bg-stone-50 transition text-sm font-medium text-stone-700"
+            >
+              <span>Ver tarifas preferenciales</span>
+              <motion.span
+                animate={{ rotate: showRates ? 180 : 0 }}
+                transition={{ duration: 0.25 }}
+                className="text-stone-400"
+              >
+                <ChevronDown size={18} />
+              </motion.span>
+            </button>
+            <AnimatePresence initial={false}>
+              {showRates && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-4 pt-2 bg-white border-t border-stone-100">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {accommodation.rooms.map((room) => (
+                        <div
+                          key={room.name}
+                          className="bg-stone-50 rounded-xl border border-stone-100 p-4"
+                        >
+                          <p className="font-heading text-stone-800 text-base mb-3 text-center">
+                            {room.name}
+                          </p>
+                          <div className="space-y-2">
+                            {room.rates.map((rate) => (
+                              <div
+                                key={rate.occupancy}
+                                className="flex items-center justify-between text-sm"
+                              >
+                                <span className="text-stone-500">{rate.occupancy}</span>
+                                <span className="font-medium text-stone-800">{rate.price}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-stone-400 text-[10px] mt-2 text-center">
+                            + impuesto 13%
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-stone-400 text-xs mt-3">{accommodation.policyNote}</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Reservation note + Contact */}
+          <p className="text-stone-500 text-xs mb-4">{accommodation.reservationNote}</p>
+          <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-stone-200">
             <a
               href={`tel:${accommodation.phone}`}
               className="inline-flex items-center gap-2 text-stone-600 text-sm hover:text-stone-800 transition"

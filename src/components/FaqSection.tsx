@@ -30,12 +30,24 @@ const faqs = [
   },
 ]
 
-function FaqItem({ question, answer, index }: { question: string; answer: string; index: number }) {
-  const [open, setOpen] = useState(false)
-
+function FaqItem({
+  question,
+  answer,
+  index,
+  isOpen,
+  onToggle,
+}: {
+  question: string
+  answer: string
+  index: number
+  isOpen: boolean
+  onToggle: () => void
+}) {
   return (
     <motion.div
-      className="border-b border-stone-200 last:border-b-0"
+      className={`border-b border-stone-200 last:border-b-0 rounded-lg px-4 -mx-4 transition-colors duration-300 ${
+        isOpen ? 'bg-white' : ''
+      }`}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -43,22 +55,22 @@ function FaqItem({ question, answer, index }: { question: string; answer: string
     >
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
         className="w-full flex items-center justify-between gap-4 py-5 text-left group"
       >
-        <span className="font-medium text-stone-800 group-hover:text-stone-600 transition-colors">
+        <span className={`font-medium transition-colors ${isOpen ? 'text-stone-900' : 'text-stone-800 group-hover:text-stone-600'}`}>
           {question}
         </span>
         <motion.span
-          animate={{ rotate: open ? 180 : 0 }}
+          animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.25 }}
-          className="shrink-0 text-stone-400"
+          className={`shrink-0 transition-colors ${isOpen ? 'text-stone-700' : 'text-stone-400'}`}
         >
           <ChevronDown size={20} />
         </motion.span>
       </button>
       <AnimatePresence initial={false}>
-        {open && (
+        {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -77,6 +89,12 @@ function FaqItem({ question, answer, index }: { question: string; answer: string
 }
 
 export function FaqSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  const handleToggle = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index)
+  }
+
   return (
     <section id="faq" className="py-16 px-6 bg-white">
       <div className="max-w-2xl mx-auto">
@@ -97,7 +115,13 @@ export function FaqSection() {
 
         <div className="bg-stone-50 rounded-2xl border border-stone-100 shadow-sm px-6">
           {faqs.map((faq, i) => (
-            <FaqItem key={faq.question} {...faq} index={i} />
+            <FaqItem
+              key={faq.question}
+              {...faq}
+              index={i}
+              isOpen={openIndex === i}
+              onToggle={() => handleToggle(i)}
+            />
           ))}
         </div>
       </div>

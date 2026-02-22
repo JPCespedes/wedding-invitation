@@ -11,6 +11,7 @@ import { AudioControl } from '../components/AudioControl'
 import { RsvpModal } from '../features/rsvp/RsvpModal'
 import { AccommodationSection } from '../components/AccommodationSection'
 import { SectionDivider } from '../components/SectionDivider'
+import { ScrollToTop } from '../components/ScrollToTop'
 import { invitationData } from '../data/invitation'
 
 export function InvitationPage() {
@@ -18,6 +19,7 @@ export function InvitationPage() {
     <>
       <AudioGate />
       <AudioControl />
+      <ScrollToTop />
       <RsvpModal />
 
       <main>

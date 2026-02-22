@@ -69,16 +69,20 @@ export function Hero() {
         <p className="text-white/80 italic text-lg md:text-xl mb-12 font-heading drop-shadow-md">
           {quote}
         </p>
-        <motion.button
+        <button
           type="button"
           onClick={scrollToContent}
-          className="inline-flex items-center gap-2 text-white/70 hover:text-white transition"
+          className="inline-flex flex-col items-center gap-1 text-white/70 hover:text-white transition"
           aria-label="Ver contenido"
-          whileHover={{ y: 4 }}
         >
           <span className="text-sm">Descubre más</span>
-          <ChevronDown size={20} />
-        </motion.button>
+          <motion.span
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <ChevronDown size={22} />
+          </motion.span>
+        </button>
       </motion.div>
     </section>
   )

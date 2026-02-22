@@ -42,20 +42,42 @@ export const invitationData = {
   gallerySubtitle:
     'Un minuto, un segundo, un instante que queda en la eternidad',
   accommodation: {
-    hotelName: 'Hotel El Rodeo',
+    hotelName: 'El Rodeo Estancia Boutique Hotel',
     description:
-      'El lugar de nuestra celebración cuenta con un hotel boutique donde podrás hospedarte con un descuento especial por ser nuestro invitado.',
-    discount: 'Mencioná que venís a la boda de Pablo & May para obtener una tarifa preferencial.',
+      'El lugar de nuestra celebración cuenta con un hotel boutique familiar con más de 40 años de tradición, donde podrás hospedarte con tarifas preferenciales por ser nuestro invitado.',
+    coupon: 'XXXXX',
+    couponNote: 'Utilizá este cupón al reservar para obtener la tarifa preferencial. Los detalles del cupón serán compartidos próximamente.',
     phone: '+506 2293-3909',
     email: 'info@elrodeohotel.com',
     bookingUrl: 'https://elrodeohotel.com/rooms.html',
-    address: 'Radial Belén-Santa Ana, Belén, Heredia',
+    address: 'Costado Suroeste de la Panasonic, Cruce Belén - Santa Ana',
+    amenities: ['Desayuno incluido', 'WiFi', 'Parqueo gratuito', 'Piscina', 'Gimnasio', 'Restaurante'],
     rooms: [
-      { name: 'Standard', description: 'Acogedora habitación con pisos de madera y ambiente cálido.' },
-      { name: 'Deluxe', description: 'Espaciosa y luminosa, con acabados en madera.' },
-      { name: 'Jr. Suite', description: 'Dos camas queen, ideal para familias.' },
-      { name: 'Suite', description: 'Romántica con cama king, tina y sala de estar.' },
+      {
+        name: 'Deluxe',
+        rates: [
+          { occupancy: 'Sencilla / Doble', price: '$79.65' },
+          { occupancy: 'Triple', price: '$97.35' },
+          { occupancy: 'Cuádruple', price: '$115.06' },
+        ],
+      },
+      {
+        name: 'Jr. Suite',
+        rates: [
+          { occupancy: 'Sencilla / Doble', price: '$97.34' },
+          { occupancy: 'Triple', price: '$115.05' },
+          { occupancy: 'Cuádruple', price: '$132.75' },
+        ],
+      },
+      {
+        name: 'Suite',
+        rates: [
+          { occupancy: 'Sencilla / Doble', price: '$119.65' },
+        ],
+      },
     ],
+    reservationNote: 'Para reservar, contactá al hotel indicando la fecha del evento, nombre de los novios, fecha de ingreso, categoría de habitación y cantidad de huéspedes.',
+    policyNote: 'Tarifas por habitación por noche, no incluyen impuesto de ley (13%). Check in: 3:00 p.m. / Check out: 12:00 m.d.',
   },
   party: {
     dressCodeShort: 'Una orientación para tu vestuario',

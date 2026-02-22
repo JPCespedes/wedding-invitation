@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -114,6 +114,7 @@ export function RsvpModal() {
   const [searchParams] = useSearchParams()
   const openModal = useAppStore((s) => s.openModal)
   const closeModal = useAppStore((s) => s.closeModal)
+  const setStoreConfirmedGuests = useAppStore((s) => s.setConfirmedGuests)
   const isOpen = openModal === 'rsvp'
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -163,6 +164,7 @@ export function RsvpModal() {
       if (result.exists && result.guests) {
         setAlreadyConfirmed(true)
         setConfirmedGuests(result.guests)
+        setStoreConfirmedGuests(result.guests)
       } else if (invitationList?.guests?.length) {
         const initial: GuestEntry[] = invitationList.guests.map((name) => ({
           name,
@@ -185,11 +187,13 @@ export function RsvpModal() {
     if (result.alreadyConfirmed) {
       setAlreadyConfirmed(true)
       setConfirmedGuests(values.guests)
+      setStoreConfirmedGuests(values.guests)
       return
     }
 
     if (result.success) {
       setSubmitted(true)
+      setStoreConfirmedGuests(values.guests)
       setTimeout(() => {
         reset({ guests: [], invitationCode: '' })
         setSubmitted(false)
@@ -248,6 +252,7 @@ export function RsvpModal() {
                   if (result.success) {
                     setAlreadyConfirmed(false)
                     setConfirmedGuests([])
+                    setStoreConfirmedGuests(null)
                     if (invitationList?.guests?.length) {
                       const initial: GuestEntry[] = invitationList.guests.map((name) => ({
                         name,
@@ -367,12 +372,19 @@ export function RsvpModal() {
     )
   }
 
+  useEffect(() => {
+    if (!isOpen) return
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = original }
+  }, [isOpen])
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <motion.div
-            className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -382,15 +394,15 @@ export function RsvpModal() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="rsvp-title"
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl p-6 mx-4"
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            className="relative w-full max-w-md max-h-[85vh] overflow-y-auto bg-white rounded-2xl shadow-2xl p-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           >
             {renderContent()}
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   )

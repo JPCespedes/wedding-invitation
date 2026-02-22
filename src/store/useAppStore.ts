@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { GuestEntry } from '../features/rsvp/rsvpSchema'
 
 const AUDIO_PREF_KEY = 'wedding-invitation-audio'
 const GATE_PASSED_KEY = 'wedding-invitation-gate-passed'
@@ -7,20 +8,17 @@ const GATE_PASSED_KEY = 'wedding-invitation-gate-passed'
 type ModalId = 'rsvp' | 'dressCode' | 'tips' | 'gifts' | 'gallery' | null
 
 interface AppState {
-  /** Si el usuario eligió entrar con música */
   audioEnabled: boolean
-  /** Si ya pasó la pantalla de entrada (Audio Gate) */
   gatePassed: boolean
-  /** Modal abierto (null = ninguno) */
   openModal: ModalId
-  /** ID del evento para el que se abrió RSVP (ceremonia | celebracion) */
   rsvpEventId: string | null
-  /** Índice de imagen en lightbox de galería */
   galleryIndex: number | null
+  confirmedGuests: GuestEntry[] | null
   setAudioEnabled: (enabled: boolean) => void
   setGatePassed: (passed: boolean) => void
   openModalAction: (id: ModalId, payload?: { eventId?: string; galleryIndex?: number }) => void
   closeModal: () => void
+  setConfirmedGuests: (guests: GuestEntry[] | null) => void
   hydrateFromStorage: () => void
 }
 
@@ -32,6 +30,7 @@ export const useAppStore = create<AppState>()(
       openModal: null,
       rsvpEventId: null,
       galleryIndex: null,
+      confirmedGuests: null,
 
       setAudioEnabled: (enabled) =>
         set({ audioEnabled: enabled }, false),
@@ -52,6 +51,9 @@ export const useAppStore = create<AppState>()(
           rsvpEventId: null,
           galleryIndex: null,
         }, false),
+
+      setConfirmedGuests: (guests) =>
+        set({ confirmedGuests: guests }, false),
 
       hydrateFromStorage: () => {
         try {

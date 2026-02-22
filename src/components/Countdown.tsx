@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   differenceInDays,
   differenceInHours,
@@ -23,6 +23,30 @@ const cardVariants = {
     scale: 1,
     transition: { type: 'spring' as const, stiffness: 200, damping: 20 },
   },
+}
+
+function FlipNumber({ value }: { value: number }) {
+  const display = String(value).padStart(2, '0')
+  const prevRef = useRef(display)
+  const changed = prevRef.current !== display
+  prevRef.current = display
+
+  return (
+    <div className="relative overflow-hidden leading-none" style={{ height: '1.25em', fontSize: 'inherit' }}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={display}
+          className="block tabular-nums"
+          initial={changed ? { y: '100%', opacity: 0 } : false}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '-100%', opacity: 0 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+        >
+          {display}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  )
 }
 
 export function Countdown() {
@@ -93,8 +117,8 @@ export function Countdown() {
               variants={cardVariants}
               className="bg-white rounded-xl shadow-sm p-4 border border-stone-100"
             >
-              <div className="font-heading text-3xl sm:text-4xl text-stone-800 tabular-nums">
-                {String(value).padStart(2, '0')}
+              <div className="font-heading text-3xl sm:text-4xl text-stone-800">
+                <FlipNumber value={value} />
               </div>
               <div className="text-sm text-stone-500 mt-1">{label}</div>
             </motion.div>

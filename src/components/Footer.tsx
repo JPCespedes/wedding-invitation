@@ -93,60 +93,54 @@ export function Footer() {
           >
             {couple.groomName} & {couple.brideName}
           </motion.p>
-          <motion.ul
-            className="flex flex-col gap-3"
+          <motion.div
+            className="flex flex-col gap-4"
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
           >
-            <li>
-              <button
-                type="button"
-                onClick={() => openModal('rsvp', { eventId: 'celebracion' })}
-                className="inline-flex items-center gap-2 py-2.5 px-4 border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition"
-              >
-                <CheckCircle size={18} />
-                Confirmar asistencia a celebración
-              </button>
-            </li>
-            <li>
+            <button
+              type="button"
+              onClick={() => openModal('rsvp', { eventId: 'celebracion' })}
+              className="inline-flex items-center justify-center gap-2 py-3 px-5 bg-stone-800 text-white rounded-lg text-sm font-medium hover:bg-stone-700 transition"
+            >
+              <CheckCircle size={18} />
+              Confirmar asistencia a celebración
+            </button>
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setShowSongModal(true)}
-                className="inline-flex items-center gap-2 py-2.5 px-4 border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition"
+                className="inline-flex items-center gap-2 py-2 px-3 border border-stone-300 text-stone-700 rounded-lg text-xs font-medium hover:bg-stone-50 transition"
               >
-                <Music size={18} />
+                <Music size={15} />
                 Sugerir canción
               </button>
-            </li>
-            <li>
               <button
                 type="button"
                 onClick={() => {
                   window.open(getGoogleCalendarUrl(celebracion), '_blank')
                   downloadIcs(celebracion)
                 }}
-                className="inline-flex items-center gap-2 py-2.5 px-4 border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition"
+                className="inline-flex items-center gap-2 py-2 px-3 border border-stone-300 text-stone-700 rounded-lg text-xs font-medium hover:bg-stone-50 transition"
               >
-                <Calendar size={18} />
+                <Calendar size={15} />
                 Agendar celebración
               </button>
-            </li>
-            <li>
               <button
                 type="button"
                 onClick={() => {
                   window.open(getGoogleCalendarUrl(ceremonia), '_blank')
                   downloadIcs(ceremonia)
                 }}
-                className="inline-flex items-center gap-2 py-2.5 px-4 border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition"
+                className="inline-flex items-center gap-2 py-2 px-3 border border-stone-300 text-stone-700 rounded-lg text-xs font-medium hover:bg-stone-50 transition"
               >
-                <Calendar size={18} />
+                <Calendar size={15} />
                 Agendar ceremonia
               </button>
-            </li>
-          </motion.ul>
+            </div>
+          </motion.div>
         </div>
       </section>
 
