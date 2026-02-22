@@ -1,29 +1,39 @@
 import { useRef, useEffect, useState } from 'react'
 import { Volume2, VolumeX } from 'lucide-react'
-import { useAppStore } from '../store/useAppStore'
+import { useAppStore, persistAudioPreference } from '../store/useAppStore'
 import { invitationData } from '../data/invitation'
 
 export function AudioControl() {
   const audioRef = useRef<HTMLAudioElement>(null)
-  const [isMuted, setIsMuted] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
   const audioEnabled = useAppStore((s) => s.audioEnabled)
+  const setAudioEnabled = useAppStore((s) => s.setAudioEnabled)
   const gatePassed = useAppStore((s) => s.gatePassed)
 
   useEffect(() => {
     if (!gatePassed || !audioEnabled || !audioRef.current) return
-    audioRef.current.play().catch(() => {})
+    audioRef.current.play().then(() => {
+      setIsPlaying(true)
+    }).catch(() => {
+      setIsPlaying(false)
+    })
   }, [gatePassed, audioEnabled])
 
-  if (!gatePassed || !audioEnabled) return null
+  if (!gatePassed) return null
 
   const toggle = () => {
     if (!audioRef.current) return
-    if (audioRef.current.paused) {
-      audioRef.current.play().catch(() => {})
-      setIsMuted(false)
-    } else {
+    if (isPlaying) {
       audioRef.current.pause()
-      setIsMuted(true)
+      setIsPlaying(false)
+      setAudioEnabled(false)
+      persistAudioPreference(false)
+    } else {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true)
+        setAudioEnabled(true)
+        persistAudioPreference(true)
+      }).catch(() => {})
     }
   }
 
@@ -36,7 +46,7 @@ export function AudioControl() {
         className="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-white/90 shadow-lg border border-stone-200 flex items-center justify-center text-stone-600 hover:bg-stone-50 transition"
         aria-label="Silenciar / Reproducir música"
       >
-        {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+        {isPlaying ? <Volume2 size={20} /> : <VolumeX size={20} />}
       </button>
     </>
   )
