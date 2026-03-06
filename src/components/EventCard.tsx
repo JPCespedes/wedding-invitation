@@ -80,7 +80,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
           <button
             type="button"
             onClick={handleRsvp}
-            className="flex-1 py-3 px-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition"
+            className="flex-1 py-3 px-4 bg-terra-500 text-white rounded-lg font-medium hover:bg-terra-600 transition"
           >
             Confirmar asistencia
           </button>
@@ -88,14 +88,14 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
         <button
           type="button"
           onClick={handleAgendar}
-          className="flex-1 py-3 px-4 border border-stone-200 text-stone-700 rounded-lg font-medium hover:bg-stone-50 transition"
+          className="flex-1 py-3 px-4 border border-dusty-500/30 text-dusty-600 rounded-lg font-medium hover:bg-dusty-50 transition"
         >
           Agendar
         </button>
         <button
           type="button"
           onClick={handleMaps}
-          className="flex-1 py-3 px-4 border border-stone-200 text-stone-700 rounded-lg font-medium hover:bg-stone-50 transition"
+          className="flex-1 py-3 px-4 border border-dusty-500/30 text-dusty-600 rounded-lg font-medium hover:bg-dusty-50 transition"
         >
           ¿Cómo llegar?
         </button>

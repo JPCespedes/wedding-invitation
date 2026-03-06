@@ -1,18 +1,13 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Check, Loader2, CalendarCheck, UserCheck, UserX } from 'lucide-react'
 import { useAppStore } from '../../store/useAppStore'
-import { invitationData } from '../../data/invitation'
 import { rsvpSchema, type RsvpFormValues, type GuestEntry } from './rsvpSchema'
 import { submitRsvp, checkExistingRsvp, deleteRsvp } from './useGoogleFormSubmit'
-
-const guestLists = invitationData.guestLists as unknown as Record<
-  string,
-  { guests: string[] }
->
+import { useInvitation } from './useInvitation'
 
 function GuestCard({
   guest,
@@ -41,7 +36,7 @@ function GuestCard({
           onClick={() => onToggle(index)}
           className={`flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium transition-colors ${
             guest.attending
-              ? 'bg-stone-700 text-white'
+              ? 'bg-terra-500 text-white'
               : 'bg-stone-200 text-stone-500'
           }`}
         >
@@ -102,7 +97,9 @@ function ConfirmedGuestList({ guests }: { guests: GuestEntry[] }) {
         <div className="bg-white rounded-lg p-4 border border-stone-100">
           <p className="text-xs uppercase text-stone-400 mb-2">No asisten</p>
           {notAttending.map((g) => (
-            <p key={g.name} className="text-stone-400 font-medium">{g.name}</p>
+            <p key={g.name} className="text-stone-400 font-medium">
+              {g.name}
+            </p>
           ))}
         </div>
       )}
@@ -125,7 +122,9 @@ export function RsvpModal() {
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const code = searchParams.get('invitacion')?.toLowerCase().trim()
-  const invitationList = code ? guestLists[code] : null
+
+  // Fetch invitation data from Supabase
+  const { invitation, isLoading: isLoadingInvitation } = useInvitation(code)
 
   const { handleSubmit, control, setValue, watch, reset } = useForm<RsvpFormValues>({
     resolver: zodResolver(rsvpSchema),
@@ -151,7 +150,7 @@ export function RsvpModal() {
   }
 
   useEffect(() => {
-    if (!isOpen || !code) return
+    if (!isOpen || !code || isLoadingInvitation) return
 
     setSubmitted(false)
     setSubmitError(null)
@@ -165,8 +164,8 @@ export function RsvpModal() {
         setAlreadyConfirmed(true)
         setConfirmedGuests(result.guests)
         setStoreConfirmedGuests(result.guests)
-      } else if (invitationList?.guests?.length) {
-        const initial: GuestEntry[] = invitationList.guests.map((name) => ({
+      } else if (invitation?.guests?.length) {
+        const initial: GuestEntry[] = invitation.guests.map((name) => ({
           name,
           attending: true,
           message: '',
@@ -175,7 +174,7 @@ export function RsvpModal() {
         setValue('invitationCode', code)
       }
     })
-  }, [isOpen, code, invitationList?.guests, setValue])
+  }, [isOpen, code, isLoadingInvitation, invitation, setValue, setStoreConfirmedGuests])
 
   const onSubmit = async (values: RsvpFormValues) => {
     setIsSubmitting(true)
@@ -207,7 +206,7 @@ export function RsvpModal() {
   const attendingCount = guests.filter((g) => g.attending).length
 
   const renderContent = () => {
-    if (isChecking) {
+    if (isChecking || isLoadingInvitation) {
       return (
         <div className="py-12 flex flex-col items-center">
           <Loader2 size={32} className="animate-spin text-stone-400 mb-4" />
@@ -223,8 +222,8 @@ export function RsvpModal() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-4">
-            <CalendarCheck className="text-stone-700" size={32} />
+          <div className="w-16 h-16 rounded-full bg-terra-50 flex items-center justify-center mx-auto mb-4">
+            <CalendarCheck className="text-terra-600" size={32} />
           </div>
           <h3 className="font-heading text-xl text-stone-800 mb-2">
             Invitación ya confirmada
@@ -253,8 +252,8 @@ export function RsvpModal() {
                     setAlreadyConfirmed(false)
                     setConfirmedGuests([])
                     setStoreConfirmedGuests(null)
-                    if (invitationList?.guests?.length) {
-                      const initial: GuestEntry[] = invitationList.guests.map((name) => ({
+                    if (invitation?.guests?.length) {
+                      const initial: GuestEntry[] = invitation.guests.map((name) => ({
                         name,
                         attending: true,
                         message: '',
@@ -282,15 +281,11 @@ export function RsvpModal() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-4">
-            <Check className="text-stone-700" size={32} />
+          <div className="w-16 h-16 rounded-full bg-terra-50 flex items-center justify-center mx-auto mb-4">
+            <Check className="text-terra-600" size={32} />
           </div>
-          <h3 className="font-heading text-xl text-stone-800 mb-2">
-            ¡Confirmado!
-          </h3>
-          <p className="text-stone-600">
-            Gracias por confirmar. ¡Los esperamos!
-          </p>
+          <h3 className="font-heading text-xl text-stone-800 mb-2">¡Confirmado!</h3>
+          <p className="text-stone-600">Gracias por confirmar. ¡Los esperamos!</p>
         </motion.div>
       )
     }
@@ -311,7 +306,7 @@ export function RsvpModal() {
           </button>
         </div>
 
-        {!invitationList ? (
+        {!invitation ? (
           <div className="py-4">
             <p className="text-stone-600 text-center">
               Para confirmar asistencia, entrá con el link que te enviamos en tu invitación.
@@ -343,7 +338,8 @@ export function RsvpModal() {
             </div>
 
             <div className="text-center text-xs text-stone-400 pt-1">
-              {attendingCount} de {guests.length} persona{guests.length !== 1 ? 's' : ''} asiste{attendingCount !== 1 ? 'n' : ''}
+              {attendingCount} de {guests.length} persona
+              {guests.length !== 1 ? 's' : ''} asiste{attendingCount !== 1 ? 'n' : ''}
             </div>
 
             {submitError && (
@@ -354,7 +350,7 @@ export function RsvpModal() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 px-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-terra-500 text-white rounded-lg font-medium hover:bg-terra-600 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
@@ -376,7 +372,9 @@ export function RsvpModal() {
     if (!isOpen) return
     const original = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = original }
+    return () => {
+      document.body.style.overflow = original
+    }
   }, [isOpen])
 
   return (

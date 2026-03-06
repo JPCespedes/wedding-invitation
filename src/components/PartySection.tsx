@@ -119,7 +119,7 @@ function SongModal({ onClose }: { onClose: () => void }) {
           <button
             type="submit"
             disabled={isSubmitting || !songName.trim()}
-            className="w-full py-3 px-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 bg-dusty-500 text-white rounded-lg font-medium hover:bg-dusty-600 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
               <>
@@ -173,7 +173,7 @@ export function PartySection() {
             transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0 }}
           >
             <div className="flex items-start gap-4">
-              <Music className="shrink-0 text-stone-400 mt-1" size={22} />
+              <Music className="shrink-0 text-dusty-400 mt-1" size={22} />
               <div>
                 <h3 className="font-heading text-lg text-stone-800 mb-2">
                   Música
@@ -182,7 +182,7 @@ export function PartySection() {
                 <button
                   type="button"
                   onClick={() => setShowSongModal(true)}
-                  className="inline-block py-2 px-4 border border-stone-200 rounded-lg text-stone-700 text-sm font-medium hover:bg-stone-50"
+                  className="inline-block py-2 px-4 border border-dusty-500/30 rounded-lg text-dusty-600 text-sm font-medium hover:bg-dusty-50"
                 >
                   Sugerir canción
                 </button>
@@ -198,7 +198,7 @@ export function PartySection() {
             transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0.1 }}
           >
             <div className="flex items-start gap-4">
-              <Shirt className="shrink-0 text-stone-400 mt-1" size={22} />
+              <Shirt className="shrink-0 text-dusty-400 mt-1" size={22} />
               <div>
                 <h3 className="font-heading text-lg text-stone-800 mb-2">
                   Dress Code
@@ -225,7 +225,7 @@ export function PartySection() {
             transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0.2 }}
           >
             <div className="flex items-start gap-4">
-              <Info className="shrink-0 text-stone-400 mt-1" size={22} />
+              <Info className="shrink-0 text-dusty-400 mt-1" size={22} />
               <div>
                 <h3 className="font-heading text-lg text-stone-800 mb-2">
                   Tips y Notas
@@ -297,17 +297,17 @@ export function PartySection() {
                 <h4 className="font-heading text-sm uppercase tracking-wide text-stone-500 mb-3">
                   Paleta de colores
                 </h4>
-                <div className="flex gap-2 justify-center">
-                  {['#F7F2ED', '#EDE5DB', '#DDD0C3', '#C4AA8C', '#B09A82', '#8B7560', '#7A5F3A'].map((color) => (
+                <div className="flex gap-3 justify-center">
+                  {['#7E9BAF', '#A8C4D8', '#B87340', '#D4A589'].map((color) => (
                     <div
                       key={color}
-                      className="w-10 h-10 rounded-full border border-stone-200 shadow-sm"
+                      className="w-12 h-12 rounded-full border border-stone-200 shadow-sm"
                       style={{ backgroundColor: color }}
                     />
                   ))}
                 </div>
                 <p className="text-stone-400 text-xs text-center mt-2 italic">
-                  Tonos neutros, cálidos y tierra
+                  Paleta de la boda
                 </p>
               </div>
 

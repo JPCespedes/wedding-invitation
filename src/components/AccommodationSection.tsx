@@ -17,7 +17,7 @@ export function AccommodationSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
         >
-          <Hotel className="mx-auto text-stone-400 mb-4" size={28} />
+          <Hotel className="mx-auto text-dusty-400 mb-4" size={28} />
           <h2 className="font-heading text-2xl md:text-3xl text-stone-800 mb-3">
             Hospedaje
           </h2>
@@ -44,7 +44,7 @@ export function AccommodationSection() {
               href={accommodation.bookingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 py-2.5 px-5 bg-stone-800 text-white rounded-lg text-sm font-medium hover:bg-stone-700 transition shrink-0"
+              className="inline-flex items-center gap-2 py-2.5 px-5 bg-dusty-600 text-white rounded-lg text-sm font-medium hover:bg-dusty-700 transition shrink-0"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
@@ -54,8 +54,8 @@ export function AccommodationSection() {
           </div>
 
           {/* Coupon */}
-          <div className="bg-stone-800 text-white rounded-xl p-4 mb-6 flex items-start gap-3">
-            <Ticket size={20} className="shrink-0 mt-0.5 text-stone-300" />
+          <div className="bg-dusty-600 text-white rounded-xl p-4 mb-6 flex items-start gap-3">
+            <Ticket size={20} className="shrink-0 mt-0.5 text-dusty-200" />
             <div>
               <p className="text-sm font-medium mb-1">
                 Cupón de descuento:{' '}
@@ -63,7 +63,7 @@ export function AccommodationSection() {
                   {accommodation.coupon}
                 </span>
               </p>
-              <p className="text-stone-300 text-xs">{accommodation.couponNote}</p>
+              <p className="text-dusty-200 text-xs">{accommodation.couponNote}</p>
             </div>
           </div>
 

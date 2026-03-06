@@ -19,7 +19,7 @@ export function ScrollToTop() {
         <motion.button
           type="button"
           onClick={scrollUp}
-          className="fixed bottom-20 right-4 z-30 w-10 h-10 rounded-full bg-stone-800/80 text-white shadow-lg backdrop-blur-sm flex items-center justify-center hover:bg-stone-700 transition"
+          className="fixed bottom-20 right-4 z-30 w-10 h-10 rounded-full bg-dusty-500/80 text-white shadow-lg backdrop-blur-sm flex items-center justify-center hover:bg-dusty-600 transition"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}

@@ -103,7 +103,7 @@ export function Footer() {
             <button
               type="button"
               onClick={() => openModal('rsvp', { eventId: 'celebracion' })}
-              className="inline-flex items-center justify-center gap-2 py-3 px-5 bg-stone-800 text-white rounded-lg text-sm font-medium hover:bg-stone-700 transition"
+              className="inline-flex items-center justify-center gap-2 py-3 px-5 bg-terra-500 text-white rounded-lg text-sm font-medium hover:bg-terra-600 transition"
             >
               <CheckCircle size={18} />
               Confirmar asistencia a celebración
@@ -112,7 +112,7 @@ export function Footer() {
               <button
                 type="button"
                 onClick={() => setShowSongModal(true)}
-                className="inline-flex items-center gap-2 py-2 px-3 border border-stone-300 text-stone-700 rounded-lg text-xs font-medium hover:bg-stone-50 transition"
+                className="inline-flex items-center gap-2 py-2 px-3 border border-dusty-500/30 text-dusty-600 rounded-lg text-xs font-medium hover:bg-dusty-50 transition"
               >
                 <Music size={15} />
                 Sugerir canción
@@ -123,7 +123,7 @@ export function Footer() {
                   window.open(getGoogleCalendarUrl(celebracion), '_blank')
                   downloadIcs(celebracion)
                 }}
-                className="inline-flex items-center gap-2 py-2 px-3 border border-stone-300 text-stone-700 rounded-lg text-xs font-medium hover:bg-stone-50 transition"
+                className="inline-flex items-center gap-2 py-2 px-3 border border-dusty-500/30 text-dusty-600 rounded-lg text-xs font-medium hover:bg-dusty-50 transition"
               >
                 <Calendar size={15} />
                 Agendar celebración
@@ -134,7 +134,7 @@ export function Footer() {
                   window.open(getGoogleCalendarUrl(ceremonia), '_blank')
                   downloadIcs(ceremonia)
                 }}
-                className="inline-flex items-center gap-2 py-2 px-3 border border-stone-300 text-stone-700 rounded-lg text-xs font-medium hover:bg-stone-50 transition"
+                className="inline-flex items-center gap-2 py-2 px-3 border border-dusty-500/30 text-dusty-600 rounded-lg text-xs font-medium hover:bg-dusty-50 transition"
               >
                 <Calendar size={15} />
                 Agendar ceremonia
@@ -144,7 +144,7 @@ export function Footer() {
         </div>
       </section>
 
-      <section className="py-8 px-6 bg-stone-300">
+      <section className="py-8 px-6 bg-dusty-600">
         <motion.div
           className="flex flex-col items-center justify-center gap-3 text-center"
           initial={{ opacity: 0 }}
@@ -152,14 +152,14 @@ export function Footer() {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <p className="text-stone-700 text-sm">
+          <p className="text-white/90 text-sm">
             Built with code, coffee & AI · Pablo Cespedes
           </p>
           <a
             href="https://www.linkedin.com/in/jose-pablo-cespedes-castro-640242ba/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 text-sm transition-colors"
+            className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors"
           >
             <Linkedin size={18} className="shrink-0" strokeWidth={2} />
             <span className="leading-none">LinkedIn</span>
@@ -237,7 +237,7 @@ export function Footer() {
                   <button
                     type="submit"
                     disabled={isSending || !songName.trim()}
-                    className="w-full py-3 px-4 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-3 px-4 bg-dusty-500 text-white rounded-lg font-medium hover:bg-dusty-600 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isSending ? (
                       <>

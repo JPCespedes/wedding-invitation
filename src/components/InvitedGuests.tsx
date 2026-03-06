@@ -2,18 +2,9 @@ import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Check } from 'lucide-react'
-import { invitationData } from '../data/invitation'
 import { useAppStore } from '../store/useAppStore'
 import { checkExistingRsvp } from '../features/rsvp/useGoogleFormSubmit'
-
-const guestLists = invitationData.guestLists as unknown as Record<
-  string,
-  {
-    totalCount: number
-    guests: string[]
-    message: string
-  }
->
+import { useInvitation } from '../features/rsvp/useInvitation'
 
 const listVariants = {
   hidden: {},
@@ -37,7 +28,7 @@ export function InvitedGuests() {
   const confirmedGuests = useAppStore((s) => s.confirmedGuests)
   const setConfirmedGuests = useAppStore((s) => s.setConfirmedGuests)
 
-  const list = code ? guestLists[code] : null
+  const { invitation, isLoading } = useInvitation(code)
 
   useEffect(() => {
     if (!code || confirmedGuests !== null) return
@@ -48,7 +39,23 @@ export function InvitedGuests() {
     })
   }, [code, confirmedGuests, setConfirmedGuests])
 
-  if (!list) return null
+  if (!code) return null
+
+  if (isLoading) {
+    return (
+      <section id="invitados" className="py-16 px-6 bg-white">
+        <div className="max-w-md mx-auto text-center space-y-3">
+          <div className="w-14 h-14 rounded-full bg-stone-100 animate-pulse mx-auto" />
+          <div className="h-6 bg-stone-100 rounded-lg animate-pulse mx-auto w-32" />
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-12 bg-stone-100 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  if (!invitation) return null
 
   const getGuestStatus = (name: string) => {
     if (!confirmedGuests) return null
@@ -71,7 +78,7 @@ export function InvitedGuests() {
             className="w-14 h-14 rounded-full border-2 border-stone-100 bg-stone-100 flex items-center justify-center text-stone-800 font-heading text-xl mb-3"
             aria-hidden
           >
-            {list.totalCount}
+            {invitation.guests.length}
           </div>
           <h2 className="font-heading text-2xl md:text-3xl text-stone-800 uppercase tracking-wide">
             Invitados
@@ -85,7 +92,7 @@ export function InvitedGuests() {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          {list.guests.map((name) => {
+          {invitation.guests.map((name) => {
             const status = getGuestStatus(name)
             const attending = status?.attending ?? null
 
@@ -93,22 +100,23 @@ export function InvitedGuests() {
               <motion.li key={name} variants={itemVariants}>
                 <span
                   className={`flex items-center justify-between py-3 px-4 rounded-lg font-medium transition-colors ${
-                    attending === true
-                      ? 'bg-stone-100 text-stone-800'
-                      : attending === false
-                        ? 'bg-stone-50 text-stone-400 line-through'
-                        : 'bg-stone-100 text-stone-800'
+                    attending === false
+                      ? 'bg-stone-50 text-stone-400 line-through'
+                      : 'bg-stone-100 text-stone-800'
                   }`}
                 >
                   <span>{name}</span>
                   {attending === true && (
-                    <span className="flex items-center gap-1 text-xs text-stone-500 font-normal">
-                      <Check size={14} className="text-stone-600" />
+                    <span className="flex items-center gap-1 text-xs text-terra-600 font-normal">
+                      <Check size={14} className="text-terra-500" />
                       Confirmado
                     </span>
                   )}
                   {attending === false && (
-                    <span className="text-xs text-stone-400 font-normal" style={{ textDecoration: 'none' }}>
+                    <span
+                      className="text-xs text-stone-400 font-normal"
+                      style={{ textDecoration: 'none' }}
+                    >
                       No asiste
                     </span>
                   )}
@@ -120,7 +128,7 @@ export function InvitedGuests() {
 
         {isConfirmed && (
           <motion.div
-            className="inline-flex items-center gap-2 bg-stone-800 text-white text-xs font-medium px-4 py-2 rounded-full mt-6"
+            className="inline-flex items-center gap-2 bg-terra-500 text-white text-xs font-medium px-4 py-2 rounded-full mt-6"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5 }}
@@ -137,7 +145,7 @@ export function InvitedGuests() {
           viewport={{ once: true }}
           transition={{ delay: 0.6, duration: 0.5 }}
         >
-          {list.message}
+          {invitation.message}
         </motion.p>
       </div>
     </section>

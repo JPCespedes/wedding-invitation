@@ -15,7 +15,7 @@ export function SectionDivider({ className = '' }: SectionDividerProps) {
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <motion.span
-          className="block h-px w-12 bg-stone-300"
+          className="block h-px w-12 bg-dusty-300"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}
@@ -27,7 +27,7 @@ export function SectionDivider({ className = '' }: SectionDividerProps) {
           height="16"
           viewBox="0 0 16 16"
           fill="none"
-          className="text-stone-400"
+          className="text-dusty-400"
         >
           <path
             d="M8 1.5l1.76 3.57 3.94.57-2.85 2.78.67 3.93L8 10.67l-3.52 1.68.67-3.93L2.3 5.64l3.94-.57L8 1.5z"
@@ -36,7 +36,7 @@ export function SectionDivider({ className = '' }: SectionDividerProps) {
           />
         </svg>
         <motion.span
-          className="block h-px w-12 bg-stone-300"
+          className="block h-px w-12 bg-dusty-300"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}

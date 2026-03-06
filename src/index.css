@@ -4,17 +4,41 @@
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  /* Wedding warm earth-tone palette (overrides stone) */
-  --color-stone-50:  #F7F2ED;
-  --color-stone-100: #EDE5DB;
-  --color-stone-200: #DDD0C3;
-  --color-stone-300: #C4AA8C;
-  --color-stone-400: #B09A82;
-  --color-stone-500: #A8907A;
-  --color-stone-600: #8B7560;
-  --color-stone-700: #7A5F3A;
-  --color-stone-800: #5C421E;
-  --color-stone-900: #3D2A10;
+  /* Wedding palette: warm cream backgrounds → dusty blue text/interactive */
+  --color-stone-50:  #FAF9F7;
+  --color-stone-100: #F0EEEB;
+  --color-stone-200: #E2DED8;
+  --color-stone-300: #BFC8CF;
+  --color-stone-400: #93A5B2;
+  --color-stone-500: #7B90A0;
+  --color-stone-600: #5A6F7E;
+  --color-stone-700: #4B5F6D;
+  --color-stone-800: #394D5A;
+  --color-stone-900: #283C48;
+
+  /* Dusty blue from wedding palette for secondary buttons & accents */
+  --color-dusty-50:  #EFF5F8;
+  --color-dusty-100: #DCE9F0;
+  --color-dusty-200: #B9D2E0;
+  --color-dusty-300: #A8C4D8;
+  --color-dusty-400: #93B0C3;
+  --color-dusty-500: #7E9BAF;
+  --color-dusty-600: #6B8799;
+  --color-dusty-700: #586F7F;
+  --color-dusty-800: #455A67;
+  --color-dusty-900: #334550;
+
+  /* Terracotta/salmon accent for CTAs */
+  --color-terra-50:  #FDF6F0;
+  --color-terra-100: #FAE8D8;
+  --color-terra-200: #F2CEAE;
+  --color-terra-300: #D4A589;
+  --color-terra-400: #C48A5F;
+  --color-terra-500: #B87340;
+  --color-terra-600: #9C6237;
+  --color-terra-700: #7D4E2C;
+  --color-terra-800: #5E3B21;
+  --color-terra-900: #3F2715;
 }
 
 @layer base {

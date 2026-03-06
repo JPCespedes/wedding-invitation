@@ -26,7 +26,7 @@ const faqs = [
   {
     question: '¿Hay after después de la boda?',
     answer:
-      '¡Si Dios lo permite, sí! Queremos seguir pasándola increíble con nuestras personas más queridas. Los detalles los compartiremos más adelante.',
+      '¡Sí! Nuestra idea es seguir pasándola bien con los nuestros. Si querés sumarte, nos alegraría mucho que formes parte. Los detalles los compartiremos más adelante.',
   },
 ]
 

@@ -59,14 +59,14 @@ export function AudioGate() {
               <button
                 type="button"
                 onClick={() => handleEnter(true)}
-                className="px-8 py-3 bg-stone-800 text-white rounded-full font-medium hover:bg-stone-700 transition"
+                className="px-8 py-3 bg-dusty-500 text-white rounded-full font-medium hover:bg-dusty-600 transition"
               >
                 Ingresar con música
               </button>
               <button
                 type="button"
                 onClick={() => handleEnter(false)}
-                className="px-8 py-3 border border-stone-300 text-stone-700 rounded-full font-medium hover:bg-stone-50 transition"
+                className="px-8 py-3 border border-dusty-300 text-dusty-600 rounded-full font-medium hover:bg-dusty-50 transition"
               >
                 Ingresar sin música
               </button>

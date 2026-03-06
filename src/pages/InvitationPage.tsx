@@ -27,7 +27,7 @@ export function InvitationPage() {
         <div id="main-content">
           <Countdown />
           <InvitedGuests />
-          <section id="events" className="py-16 px-6 bg-stone-100">
+          <section id="events" className="py-16 px-6 bg-stone-50">
             <div className="max-w-2xl mx-auto text-center mb-12">
               <motion.h2
                 className="font-heading text-2xl md:text-3xl text-stone-800"
