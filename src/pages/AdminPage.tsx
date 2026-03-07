@@ -529,6 +529,12 @@ function AdminDashboard() {
     return acc + (r.rsvp.guests as GuestEntry[]).filter((g) => !g.attending).length
   }, 0)
   const totalInvited = rows.reduce((acc, r) => acc + r.guests.length, 0)
+  const invWithAttending = rows.filter(
+    (r) => r.rsvp && (r.rsvp.guests as GuestEntry[]).some((g) => g.attending),
+  ).length
+  const invWithNotAttending = rows.filter(
+    (r) => r.rsvp && (r.rsvp.guests as GuestEntry[]).some((g) => !g.attending),
+  ).length
 
   const handleModalSaved = () => {
     setInvitationModal({ open: false, row: null })
@@ -581,14 +587,14 @@ function AdminDashboard() {
             {
               label: 'Personas asisten',
               value: totalAttending,
-              sub: `${confirmed} invitacion${confirmed !== 1 ? 'es' : ''}`,
+              sub: `${invWithAttending} invitacion${invWithAttending !== 1 ? 'es' : ''}`,
               icon: <CheckCircle size={18} />,
               className: 'text-terra-600 bg-terra-50',
             },
             {
               label: 'Personas no asisten',
               value: totalNotAttending,
-              sub: `${declined} invitacion${declined !== 1 ? 'es' : ''}`,
+              sub: `${invWithNotAttending} invitacion${invWithNotAttending !== 1 ? 'es' : ''}`,
               icon: <XCircle size={18} />,
               className: 'text-stone-400 bg-white',
             },
