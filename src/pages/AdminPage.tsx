@@ -517,8 +517,6 @@ function AdminDashboard() {
     return sortDir === 'asc' ? cmp : -cmp
   })
 
-  const confirmed = rows.filter((r) => r.status === 'confirmed').length
-  const declined = rows.filter((r) => r.status === 'declined').length
   const pending = rows.filter((r) => r.status === 'pending').length
   const totalAttending = rows.reduce((acc, r) => {
     if (!r.rsvp) return acc
@@ -538,7 +536,7 @@ function AdminDashboard() {
 
   const handleModalSaved = () => {
     setInvitationModal({ open: false, row: null })
-    setRsvpModal({ open: false, row: null })
+    setRsvpDetailModal({ open: false, row: null })
     refresh()
   }
 
