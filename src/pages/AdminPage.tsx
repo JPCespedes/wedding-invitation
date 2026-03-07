@@ -13,6 +13,7 @@ import {
   Trash2,
   UserPlus,
   UserMinus,
+  UserCheck,
   Loader2,
   Users,
   ChevronsUpDown,
@@ -289,37 +290,60 @@ function InvitationModal({ initial, onClose, onSaved }: InvitationModalProps) {
   )
 }
 
-// ─── RSVP Override Modal ──────────────────────────────────────────────────────
+// ─── RSVP Detail Modal ───────────────────────────────────────────────────────
 
-interface RsvpOverrideModalProps {
+interface RsvpDetailModalProps {
   row: AdminRow
   onClose: () => void
   onSaved: () => void
 }
 
-function RsvpOverrideModal({ row, onClose, onSaved }: RsvpOverrideModalProps) {
-  const [isLoading, setIsLoading] = useState(false)
+function RsvpDetailModal({ row, onClose, onSaved }: RsvpDetailModalProps) {
+  const [guestList, setGuestList] = useState<GuestEntry[]>(() => {
+    if (row.rsvp?.guests?.length) {
+      return row.rsvp.guests as GuestEntry[]
+    }
+    return row.guests.map((name) => ({ name, attending: true, message: '' }))
+  })
+  const [isSaving, setIsSaving] = useState(false)
+  const [isClearing, setIsClearing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handle = async (action: 'confirm' | 'decline' | 'clear') => {
-    setIsLoading(true)
+  const toggle = (i: number) => {
+    setGuestList((prev) =>
+      prev.map((g, idx) =>
+        idx === i ? { ...g, attending: !g.attending, message: g.attending ? '' : g.message } : g,
+      ),
+    )
+  }
+
+  const updateComment = (i: number, value: string) => {
+    setGuestList((prev) =>
+      prev.map((g, idx) => (idx === i ? { ...g, message: value } : g)),
+    )
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
     setError(null)
-    let result
-    if (action === 'clear') {
-      result = await clearRsvp(row.code)
-    } else {
-      const guests: GuestEntry[] = row.guests.map((name) => ({
-        name,
-        attending: action === 'confirm',
-        message: '',
-      }))
-      result = await upsertRsvp(row.code, guests)
-    }
-    setIsLoading(false)
+    const result = await upsertRsvp(row.code, guestList)
+    setIsSaving(false)
     if (result.success) {
       onSaved()
     } else {
-      setError(result.error ?? 'Error')
+      setError(result.error ?? 'Error al guardar')
+    }
+  }
+
+  const handleClear = async () => {
+    setIsClearing(true)
+    setError(null)
+    const result = await clearRsvp(row.code)
+    setIsClearing(false)
+    if (result.success) {
+      onSaved()
+    } else {
+      setError(result.error ?? 'Error al limpiar')
     }
   }
 
@@ -327,13 +351,16 @@ function RsvpOverrideModal({ row, onClose, onSaved }: RsvpOverrideModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <motion.div
-        className="relative bg-white rounded-2xl shadow-xl max-w-sm w-full p-6"
+        className="relative bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-heading text-lg text-stone-800">Modificar RSVP</h3>
+        <div className="sticky top-0 bg-white border-b border-stone-100 px-6 py-4 flex items-center justify-between z-10">
+          <div>
+            <h3 className="font-heading text-lg text-stone-800">Modificar RSVP</h3>
+            <p className="text-xs text-stone-400 mt-0.5 font-mono">{row.code}</p>
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -342,44 +369,76 @@ function RsvpOverrideModal({ row, onClose, onSaved }: RsvpOverrideModalProps) {
             <X size={18} />
           </button>
         </div>
-        <p className="text-sm text-stone-500 mb-1">
-          Código: <strong className="text-stone-800">{row.code}</strong>
-        </p>
-        <p className="text-sm text-stone-500 mb-5">{row.guests.join(', ')}</p>
-        <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => handle('confirm')}
-            disabled={isLoading}
-            className="w-full py-2.5 px-4 bg-terra-500 text-white rounded-lg text-sm font-medium hover:bg-terra-600 transition disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <Loader2 size={15} className="animate-spin" />
-            ) : (
-              <CheckCircle size={15} />
-            )}
-            Confirmar todos
-          </button>
-          <button
-            type="button"
-            onClick={() => handle('decline')}
-            disabled={isLoading}
-            className="w-full py-2.5 px-4 border border-stone-200 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {isLoading ? <Loader2 size={15} className="animate-spin" /> : <XCircle size={15} />}
-            Cancelar todos
-          </button>
-          <button
-            type="button"
-            onClick={() => handle('clear')}
-            disabled={isLoading}
-            className="w-full py-2.5 px-4 border border-stone-200 text-stone-500 rounded-lg text-sm font-medium hover:bg-stone-50 transition disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {isLoading ? <Loader2 size={15} className="animate-spin" /> : <Clock size={15} />}
-            Limpiar (pendiente)
-          </button>
+
+        <div className="p-6 space-y-3">
+          {guestList.map((guest, i) => (
+            <div
+              key={guest.name}
+              className={`rounded-xl border p-4 transition-colors ${
+                guest.attending
+                  ? 'bg-stone-50 border-stone-200'
+                  : 'bg-white border-stone-100 opacity-60'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <span className="font-medium text-stone-800">{guest.name}</span>
+                <button
+                  type="button"
+                  onClick={() => toggle(i)}
+                  className={`flex items-center gap-1.5 py-1.5 px-3 rounded-full text-xs font-medium transition-colors ${
+                    guest.attending
+                      ? 'bg-terra-500 text-white'
+                      : 'bg-stone-200 text-stone-500'
+                  }`}
+                >
+                  {guest.attending ? (
+                    <>
+                      <UserCheck size={14} />
+                      Asiste
+                    </>
+                  ) : (
+                    <>
+                      <UserMinus size={14} />
+                      No asiste
+                    </>
+                  )}
+                </button>
+              </div>
+              {guest.attending && (
+                <input
+                  type="text"
+                  value={guest.message ?? ''}
+                  onChange={(e) => updateComment(i, e.target.value)}
+                  placeholder="Alergias o restricciones alimentarias"
+                  className="w-full mt-1 px-3 py-2 text-sm border border-stone-200 rounded-lg focus:ring-2 focus:ring-stone-300 focus:border-stone-400 outline-none transition"
+                />
+              )}
+            </div>
+          ))}
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex-1 py-2.5 px-4 bg-terra-500 text-white rounded-lg text-sm font-medium hover:bg-terra-600 transition disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {isSaving && <Loader2 size={15} className="animate-spin" />}
+              {isSaving ? 'Guardando...' : 'Guardar'}
+            </button>
+            <button
+              type="button"
+              onClick={handleClear}
+              disabled={isClearing}
+              className="px-4 py-2.5 border border-stone-200 text-stone-500 rounded-lg text-sm font-medium hover:bg-stone-50 transition disabled:opacity-60 flex items-center gap-2"
+            >
+              {isClearing ? <Loader2 size={14} className="animate-spin" /> : <Clock size={14} />}
+              Limpiar
+            </button>
+          </div>
         </div>
-        {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
       </motion.div>
     </div>
   )
@@ -389,6 +448,7 @@ function RsvpOverrideModal({ row, onClose, onSaved }: RsvpOverrideModalProps) {
 
 type SortKey = 'code' | 'status' | 'guests'
 type SortDir = 'asc' | 'desc'
+type FilterMode = RsvpStatus | 'all' | 'attending_people' | 'not_attending_people'
 
 const STATUS_ORDER: Record<RsvpStatus, number> = {
   confirmed: 0,
@@ -414,7 +474,7 @@ function SortIcon({
 function AdminDashboard() {
   const { rows, isLoading, error, refresh } = useAdminData()
 
-  const [filterStatus, setFilterStatus] = useState<RsvpStatus | 'all'>('all')
+  const [filterStatus, setFilterStatus] = useState<FilterMode>('all')
   const [sortKey, setSortKey] = useState<SortKey>('code')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
 
@@ -422,7 +482,7 @@ function AdminDashboard() {
     open: boolean
     row: InvitationRow | null
   }>({ open: false, row: null })
-  const [rsvpModal, setRsvpModal] = useState<{ open: boolean; row: AdminRow | null }>({
+  const [rsvpDetailModal, setRsvpDetailModal] = useState<{ open: boolean; row: AdminRow | null }>({
     open: false,
     row: null,
   })
@@ -440,9 +500,14 @@ function AdminDashboard() {
     }
   }
 
-  const filtered = rows.filter(
-    (r) => filterStatus === 'all' || r.status === filterStatus,
-  )
+  const filtered = rows.filter((r) => {
+    if (filterStatus === 'all') return true
+    if (filterStatus === 'attending_people')
+      return (r.rsvp?.guests as GuestEntry[] ?? []).some((g) => g.attending)
+    if (filterStatus === 'not_attending_people')
+      return (r.rsvp?.guests as GuestEntry[] ?? []).some((g) => !g.attending)
+    return r.status === filterStatus
+  })
 
   const sorted = [...filtered].sort((a, b) => {
     let cmp = 0
@@ -458,6 +523,10 @@ function AdminDashboard() {
   const totalAttending = rows.reduce((acc, r) => {
     if (!r.rsvp) return acc
     return acc + (r.rsvp.guests as GuestEntry[]).filter((g) => g.attending).length
+  }, 0)
+  const totalNotAttending = rows.reduce((acc, r) => {
+    if (!r.rsvp) return acc
+    return acc + (r.rsvp.guests as GuestEntry[]).filter((g) => !g.attending).length
   }, 0)
   const totalInvited = rows.reduce((acc, r) => acc + r.guests.length, 0)
 
@@ -500,26 +569,26 @@ function AdminDashboard() {
 
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
           {[
             {
-              label: 'Invitados totales',
+              label: 'Total invitados',
               value: totalInvited,
               sub: `${rows.length} invitaciones`,
               icon: <Users size={18} />,
               className: 'text-stone-600 bg-white',
             },
             {
-              label: 'Confirmados',
+              label: 'Personas asisten',
               value: totalAttending,
               sub: `${confirmed} invitacion${confirmed !== 1 ? 'es' : ''}`,
               icon: <CheckCircle size={18} />,
               className: 'text-terra-600 bg-terra-50',
             },
             {
-              label: 'Cancelados',
-              value: declined,
-              sub: 'invitaciones',
+              label: 'Personas no asisten',
+              value: totalNotAttending,
+              sub: `${declined} invitacion${declined !== 1 ? 'es' : ''}`,
               icon: <XCircle size={18} />,
               className: 'text-stone-400 bg-white',
             },
@@ -529,6 +598,13 @@ function AdminDashboard() {
               sub: 'sin respuesta',
               icon: <Clock size={18} />,
               className: 'text-dusty-600 bg-dusty-50',
+            },
+            {
+              label: 'Sin confirmar',
+              value: totalInvited - totalAttending - totalNotAttending,
+              sub: 'personas',
+              icon: <Users size={18} />,
+              className: 'text-stone-500 bg-stone-50',
             },
           ].map(({ label, value, sub, icon, className }) => (
             <div
@@ -553,26 +629,29 @@ function AdminDashboard() {
         )}
 
         {/* Filter */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-sm text-stone-500">Filtrar:</span>
-          {(['all', 'confirmed', 'declined', 'pending'] as const).map((s) => (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-stone-500 mr-1">Filtrar:</span>
+          {(
+            [
+              { value: 'all', label: 'Todos' },
+              { value: 'confirmed', label: 'Confirmados' },
+              { value: 'declined', label: 'Cancelados' },
+              { value: 'pending', label: 'Pendientes' },
+              { value: 'attending_people', label: 'Personas asisten' },
+              { value: 'not_attending_people', label: 'Personas no asisten' },
+            ] as { value: FilterMode; label: string }[]
+          ).map(({ value, label }) => (
             <button
-              key={s}
+              key={value}
               type="button"
-              onClick={() => setFilterStatus(s)}
+              onClick={() => setFilterStatus(value)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                filterStatus === s
+                filterStatus === value
                   ? 'bg-dusty-600 text-white'
                   : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
               }`}
             >
-              {s === 'all'
-                ? 'Todos'
-                : s === 'confirmed'
-                  ? 'Confirmados'
-                  : s === 'declined'
-                    ? 'Cancelados'
-                    : 'Pendientes'}
+              {label}
             </button>
           ))}
           <span className="text-stone-400 text-xs ml-auto">
@@ -698,7 +777,7 @@ function AdminDashboard() {
                             </button>
                             <button
                               type="button"
-                              onClick={() => setRsvpModal({ open: true, row })}
+                              onClick={() => setRsvpDetailModal({ open: true, row })}
                               className="p-2 rounded-lg text-stone-400 hover:text-terra-600 hover:bg-terra-50 transition"
                               title="Modificar RSVP"
                             >
@@ -725,10 +804,10 @@ function AdminDashboard() {
             onSaved={handleModalSaved}
           />
         )}
-        {rsvpModal.open && rsvpModal.row && (
-          <RsvpOverrideModal
-            row={rsvpModal.row}
-            onClose={() => setRsvpModal({ open: false, row: null })}
+        {rsvpDetailModal.open && rsvpDetailModal.row && (
+          <RsvpDetailModal
+            row={rsvpDetailModal.row}
+            onClose={() => setRsvpDetailModal({ open: false, row: null })}
             onSaved={handleModalSaved}
           />
         )}

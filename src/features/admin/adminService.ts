@@ -77,9 +77,11 @@ export async function upsertRsvp(
   code: string,
   guests: GuestEntry[],
 ): Promise<{ success: boolean; error?: string }> {
+  await supabase.from('rsvp_confirmations').delete().eq('invitation_code', code)
+
   const { error } = await supabase
     .from('rsvp_confirmations')
-    .upsert({ invitation_code: code, guests }, { onConflict: 'invitation_code' })
+    .insert({ invitation_code: code, guests })
 
   if (error) return { success: false, error: error.message }
   return { success: true }
