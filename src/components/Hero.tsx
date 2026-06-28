@@ -40,7 +40,7 @@ export function Hero() {
     >
       {/* Background image with parallax */}
       <motion.div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-no-repeat bg-[64%_15%] sm:bg-center"
         style={{
           backgroundImage: `url(${heroImage})`,
           y: bgY,
