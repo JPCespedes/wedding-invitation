@@ -7,7 +7,7 @@ import { es } from 'date-fns/locale'
 
 export function Hero() {
   const { groomName, brideName, dateISO, quote } = invitationData.couple
-  const heroImage = invitationData.gallery[0].src
+  const heroImage = invitationData.heroImage
   const date = new Date(dateISO)
   const formattedDate = format(date, "EEEE d 'de' MMMM", { locale: es })
 
