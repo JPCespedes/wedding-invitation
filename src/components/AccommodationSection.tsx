@@ -1,33 +1,31 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Hotel, Phone, Mail, ExternalLink, Ticket, ChevronDown } from 'lucide-react'
+import { Phone, Mail, ExternalLink, Ticket, ChevronDown } from 'lucide-react'
 import { invitationData } from '../data/invitation'
+import { SectionHeading } from './SectionHeading'
+import { FloralSpray } from './ornaments/FloralSpray'
 
 export function AccommodationSection() {
   const { accommodation } = invitationData
   const [showRates, setShowRates] = useState(false)
 
   return (
-    <section id="accommodation" className="py-16 px-6 bg-white border-t border-stone-100">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          className="text-center mb-10"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-        >
-          <Hotel className="mx-auto text-dusty-400 mb-4" size={28} />
-          <h2 className="font-heading text-2xl md:text-3xl text-stone-800 mb-3">
-            Hospedaje
-          </h2>
-          <p className="text-stone-600 max-w-xl mx-auto">
-            {accommodation.description}
-          </p>
-        </motion.div>
+    <section
+      id="accommodation"
+      className="relative py-16 sm:py-20 px-5 sm:px-6 bg-stone-100 overflow-hidden paper-grain"
+    >
+      <FloralSpray className="absolute -top-4 -left-7 w-36 sm:w-48" variant="sprig" />
+
+      <div className="relative max-w-4xl mx-auto">
+        <SectionHeading
+          eyebrow="Después de la fiesta"
+          title="Hospedaje"
+          subtitle={accommodation.description}
+          className="mb-9 sm:mb-10"
+        />
 
         <motion.div
-          className="bg-stone-50 border border-stone-200 rounded-2xl p-6 sm:p-8"
+          className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-[0_2px_12px_rgba(17,42,67,0.07)] overflow-hidden"
           initial={{ opacity: 0, y: 30, scale: 0.97 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true }}
@@ -35,7 +33,7 @@ export function AccommodationSection() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h3 className="font-heading text-xl text-stone-800">
+              <h3 className="font-heading text-2xl font-medium text-stone-800">
                 {accommodation.hotelName}
               </h3>
               <p className="text-stone-500 text-sm mt-1">{accommodation.address}</p>
@@ -44,7 +42,7 @@ export function AccommodationSection() {
               href={accommodation.bookingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 py-2.5 px-5 bg-dusty-600 text-white rounded-lg text-sm font-medium hover:bg-dusty-700 transition shrink-0"
+              className="inline-flex items-center gap-2 py-3 px-5 bg-terra-500 text-white rounded-lg text-sm font-medium hover:bg-terra-600 transition shrink-0 shadow-[0_2px_8px_rgba(173,85,49,0.26)]"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
@@ -54,16 +52,18 @@ export function AccommodationSection() {
           </div>
 
           {/* Coupon */}
-          <div className="bg-dusty-600 text-white rounded-xl p-4 mb-6 flex items-start gap-3">
-            <Ticket size={20} className="shrink-0 mt-0.5 text-dusty-200" />
+          <div className="bg-terra-50 border border-dashed border-gold-500/75 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <Ticket size={20} className="shrink-0 mt-0.5 text-terra-500" />
             <div>
-              <p className="text-sm font-medium mb-1">
-                Cupón de descuento:{' '}
-                <span className="font-mono tracking-wider bg-white/15 px-2 py-0.5 rounded">
+              <p className="text-sm text-stone-700 mb-1">
+                <span className="text-[10px] uppercase tracking-[0.16em] text-stone-400 block mb-1">
+                  Cupón de invitado
+                </span>
+                <span className="font-heading text-xl tracking-[0.12em] text-terra-600">
                   {accommodation.coupon}
                 </span>
               </p>
-              <p className="text-dusty-200 text-xs">{accommodation.couponNote}</p>
+              <p className="text-stone-500 text-xs">{accommodation.couponNote}</p>
             </div>
           </div>
 
@@ -72,7 +72,7 @@ export function AccommodationSection() {
             {accommodation.amenities.map((amenity) => (
               <span
                 key={amenity}
-                className="text-xs bg-white border border-stone-200 text-stone-600 rounded-full px-3 py-1"
+                className="text-xs bg-dusty-50 border border-dusty-100 text-dusty-700 rounded-full px-3 py-1.5"
               >
                 {amenity}
               </span>
@@ -109,9 +109,9 @@ export function AccommodationSection() {
                       {accommodation.rooms.map((room) => (
                         <div
                           key={room.name}
-                          className="bg-stone-50 rounded-xl border border-stone-100 p-4"
+                          className="bg-terra-50/60 rounded-xl border border-gold-500/25 p-4"
                         >
-                          <p className="font-heading text-stone-800 text-base mb-3 text-center">
+                          <p className="font-heading text-stone-800 text-lg font-medium mb-3 text-center">
                             {room.name}
                           </p>
                           <div className="space-y-2">
@@ -121,7 +121,7 @@ export function AccommodationSection() {
                                 className="flex items-center justify-between text-sm"
                               >
                                 <span className="text-stone-500">{rate.occupancy}</span>
-                                <span className="font-medium text-stone-800">{rate.price}</span>
+                                <span className="font-medium text-terra-600">{rate.price}</span>
                               </div>
                             ))}
                           </div>

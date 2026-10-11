@@ -31,6 +31,16 @@ export const invitationData = {
       mapsQuery: "9.9767325,-84.199894"
     },
   ],
+  /**
+   * Portada. El video va sin sonido y en bucle; el póster es su primer
+   * fotograma y es lo que se ve mientras carga (y si el video falla).
+   * El original venía en HEVC, que no reproducen la mayoría de navegadores:
+   * public/video/hero.mp4 es el mismo clip en H.264 540×960.
+   */
+  heroVideo: {
+    src: `${base}video/hero.mp4`,
+    poster: `${base}video/hero-poster.jpg`,
+  },
   heroImage: `${base}images/RLR_6587.jpg`,
   gallery: [
     { id: '1', src: `${base}images/RLR_6612.jpg`, alt: 'Retrato 1' },
@@ -86,8 +96,61 @@ export const invitationData = {
   },
   party: {
     dressCodeShort: 'Una orientación para tu vestuario',
-    dressCodeLong:
-      'Elegante casual. Preferimos tonos claros y neutros. Evitar deportivo.',
+    /**
+     * Lo que abre «Ver más» en la tarjeta de Dress Code. La paleta copia el
+     * moodboard: los hex se midieron sobre sus círculos, así que si cambia la
+     * imagen hay que volver a medirlos. La excepción es el azul denim, que usa
+     * el azul oficial de la boda (stone-800 en index.css) y no el del moodboard.
+     */
+    dressCode: {
+      style: 'Elegante casual',
+      paletteIntro:
+        'Nos encantaría que nos acompañen con algún detalle de vestimenta en los tonos de nuestra paleta de colores.',
+      palette: [
+        { name: 'Terracota', hex: '#AF5632' },
+        { name: 'Azul denim', hex: '#203E5C' },
+        { name: 'Azul grisáceo', hex: '#798EA1' },
+        { name: 'Verde oliva', hex: '#5A593D' },
+        { name: 'Verde salvia', hex: '#7E7C63' },
+        { name: 'Mostaza', hex: '#BB813E' },
+        { name: 'Rosa empolvado', hex: '#BB7E73' },
+        { name: 'Lila', hex: '#A17B8A' },
+        { name: 'Taupe', hex: '#8C7666' },
+      ],
+      /**
+       * Cada fila lleva un círculo tachado: `swatches` pinta uno o dos colores
+       * (dos se dibujan como círculos superpuestos), `icon` un dibujo.
+       */
+      avoid: [
+        {
+          title: 'Blanco y tonos parecidos',
+          detail: 'Marfil, crema o hueso: esos los reservamos para la novia.',
+          swatches: ['#FFFFFF'],
+        },
+        {
+          title: 'Vestidos rojos o negros',
+          detail: 'Para ellas, mejor algún tono de la paleta.',
+          swatches: ['#B3262D', '#2B2A2C'],
+        },
+        {
+          title: 'Ropa deportiva y tenis',
+          detail: 'Es una celebración elegante, ¡aprovechá para lucirte!',
+          icon: 'sneaker',
+        },
+      ],
+      moodboard: {
+        src: `${base}images/dress-code-moodboard.jpg`,
+        alt: 'Moodboard de vestimenta: vestidos y trajes en terracota, azul, verde, mostaza, rosa, lila y taupe, con flores y mesas de referencia.',
+        width: 1536,
+        height: 1024,
+      },
+      /**
+       * Tablero público de Pinterest (a esta dirección lleva https://pin.it/1JjXCs8U6).
+       * Ojo: el link de «Invitar colaboradores» también es un pin.it, pero deja a
+       * quien lo abra editar el tablero. Si queda vacío, el botón dice «muy pronto».
+       */
+      pinterestUrl: 'https://www.pinterest.com/maylida/wedding-color/',
+    },
     tips: [
       'Amamos a los pequeños de la familia, pero la celebración será exclusivamente para adultos. ¡Los niños son bienvenidos en la ceremonia!',
       'Contamos con servicio de descorche, así que si querés llevar tu bebida favorita para brindar, ¡adelante!',
@@ -98,9 +161,13 @@ export const invitationData = {
       '¿Cuál es la canción que no debe faltar en la PlayList de la fiesta?',
   },
   gifts: {
-    text: 'Si deseas regalarnos algo más que tu hermosa presencia, agradecemos contribuciones para nuestro hogar.\n\nCliente: JOSE PABLO CESPEDES CASTRO\nNúmero de cuenta BAC: 704133529\nNúmero de cuenta IBAN: CR91010200007041335293\nSinpe Móvil: 86443226',
+    text: 'Si deseas regalarnos algo más que tu hermosa presencia, agradecemos contribuciones para nuestro hogar.\n\nCliente: JOSE PABLO CESPEDES CASTRO\nColones\nNúmero de cuenta BAC: 704133529\nNúmero de cuenta IBAN: CR91010200007041335293\n\nDólares\nNúmero de cuenta BAC: 704133222\nNúmero de cuenta IBAN: CR89010200007041332225\n\nSinpe Móvil: 86443226',
+    holder: 'José Pablo Céspedes Castro',
+    bank: 'Banco BAC',
     accountBAC: '704133529',
     accountIBAN: 'CR91010200007041335293',
+    accountBACUsd: '704133222',
+    accountIBANUsd: 'CR89010200007041332225',
     sinpeMovil: '86443226',
   },
   googleForms: {

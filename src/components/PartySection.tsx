@@ -4,6 +4,9 @@ import { Music, Shirt, Info, X, Loader2, Check } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import { invitationData } from '../data/invitation'
 import { submitSongSuggestion } from '../features/rsvp/useGoogleFormSubmit'
+import { SectionHeading } from './SectionHeading'
+import { DressCodeDetails, PaletteDots } from './DressCode'
+import { FloralSpray } from './ornaments/FloralSpray'
 
 function useBodyScrollLock(locked: boolean) {
   useEffect(() => {
@@ -146,36 +149,34 @@ export function PartySection() {
   useBodyScrollLock(openModalId === 'dressCode' || openModalId === 'tips' || showSongModal)
 
   return (
-    <section id="party" className="py-16 px-6 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-        >
-          <h2 className="font-heading text-2xl md:text-3xl text-stone-800 mb-4">
-            Fiesta
-          </h2>
-          <p className="text-stone-600">
-            Hagamos juntos una fiesta épica. Aquí algunos detalles a tener en
-            cuenta.
-          </p>
-        </motion.div>
+    <section
+      id="party"
+      className="relative py-16 sm:py-20 px-5 sm:px-6 bg-stone-50 overflow-hidden paper-grain"
+    >
+      <FloralSpray className="absolute -top-3 -right-7 w-40 sm:w-52" mirrored />
+
+      <div className="relative max-w-6xl mx-auto">
+        <SectionHeading
+          eyebrow="Para que la disfrutes"
+          title="La fiesta"
+          subtitle="Hagamos juntos una fiesta épica. Aquí algunos detalles a tener en cuenta."
+          className="mb-10 sm:mb-12"
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <motion.div
-            className="bg-stone-50 rounded-xl shadow-sm border border-stone-100 p-6"
+            className="relative bg-white rounded-2xl shadow-[0_2px_10px_rgba(17,42,67,0.05)] border border-stone-100 border-l-[3px] border-l-gold-500 p-6"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-30px' }}
             transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0 }}
           >
             <div className="flex items-start gap-4">
-              <Music className="shrink-0 text-dusty-400 mt-1" size={22} />
+              <span className="flex items-center justify-center w-11 h-11 rounded-full border border-gold-500/50 bg-terra-50 shrink-0">
+                <Music className="text-terra-500" size={20} strokeWidth={1.5} />
+              </span>
               <div>
-                <h3 className="font-heading text-lg text-stone-800 mb-2">
+                <h3 className="font-heading text-xl font-medium text-stone-800 mb-2">
                   Música
                 </h3>
                 <p className="text-stone-600 text-sm mb-4">{party.songPrompt}</p>
@@ -191,21 +192,24 @@ export function PartySection() {
           </motion.div>
 
           <motion.div
-            className="bg-stone-50 rounded-xl shadow-sm border border-stone-100 p-6"
+            className="relative bg-white rounded-2xl shadow-[0_2px_10px_rgba(17,42,67,0.05)] border border-stone-100 border-l-[3px] border-l-gold-500 p-6"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-30px' }}
             transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0.1 }}
           >
             <div className="flex items-start gap-4">
-              <Shirt className="shrink-0 text-dusty-400 mt-1" size={22} />
+              <span className="flex items-center justify-center w-11 h-11 rounded-full border border-gold-500/50 bg-dusty-50 shrink-0">
+                <Shirt className="text-dusty-600" size={20} strokeWidth={1.5} />
+              </span>
               <div>
-                <h3 className="font-heading text-lg text-stone-800 mb-2">
+                <h3 className="font-heading text-xl font-medium text-stone-800 mb-2">
                   Dress Code
                 </h3>
-                <p className="text-stone-600 text-sm mb-4">
+                <p className="text-stone-600 text-sm mb-3">
                   {party.dressCodeShort}
                 </p>
+                <PaletteDots className="mb-4" />
                 <button
                   type="button"
                   onClick={() => openModal('dressCode')}
@@ -218,16 +222,18 @@ export function PartySection() {
           </motion.div>
 
           <motion.div
-            className="bg-stone-50 rounded-xl shadow-sm border border-stone-100 p-6"
+            className="relative bg-white rounded-2xl shadow-[0_2px_10px_rgba(17,42,67,0.05)] border border-stone-100 border-l-[3px] border-l-gold-500 p-6"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-30px' }}
             transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0.2 }}
           >
             <div className="flex items-start gap-4">
-              <Info className="shrink-0 text-dusty-400 mt-1" size={22} />
+              <span className="flex items-center justify-center w-11 h-11 rounded-full border border-gold-500/50 bg-terra-50 shrink-0">
+                <Info className="text-terra-500" size={20} strokeWidth={1.5} />
+              </span>
               <div>
-                <h3 className="font-heading text-lg text-stone-800 mb-2">
+                <h3 className="font-heading text-xl font-medium text-stone-800 mb-2">
                   Tips y Notas
                 </h3>
                 <p className="text-stone-600 text-sm">
@@ -272,14 +278,14 @@ export function PartySection() {
       {/* Dress code & tips modals */}
       {openModalId === 'dressCode' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
+          <div className="absolute inset-0 bg-stone-900/55" onClick={closeModal} />
           <motion.div
-            className="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col"
+            className="relative bg-white rounded-2xl shadow-xl border border-gold-500/40 max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <div className="sticky top-0 z-10 bg-white rounded-t-2xl border-b border-stone-100 px-6 py-4 flex justify-between items-center shrink-0">
-              <h3 className="font-heading text-xl text-stone-800">Dress Code</h3>
+            <div className="sticky top-0 z-10 bg-white border-b border-stone-100 px-6 py-4 flex justify-between items-center shrink-0">
+              <h3 className="font-heading text-2xl font-medium text-stone-800">Dress Code</h3>
               <button
                 type="button"
                 onClick={closeModal}
@@ -289,78 +295,13 @@ export function PartySection() {
                 <X size={20} />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto">
-
-              <p className="text-stone-600 text-sm mb-6">{party.dressCodeLong}</p>
-
-              <div className="mb-6">
-                <h4 className="font-heading text-sm uppercase tracking-wide text-stone-500 mb-3">
-                  Paleta de colores
-                </h4>
-                <div className="flex gap-3 justify-center">
-                  {['#7E9BAF', '#A8C4D8', '#B87340', '#D4A589'].map((color) => (
-                    <div
-                      key={color}
-                      className="w-12 h-12 rounded-full border border-stone-200 shadow-sm"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-                <p className="text-stone-400 text-xs text-center mt-2 italic">
-                  Paleta de la boda
-                </p>
-              </div>
-
-              <div className="mb-6">
-                <h4 className="font-heading text-sm uppercase tracking-wide text-stone-500 mb-3">
-                  Mujeres
-                </h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <img
-                    src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=300&h=400&fit=crop"
-                    alt="Vestido elegante 1"
-                    className="w-full aspect-[3/4] object-cover rounded-lg"
-                  />
-                  <img
-                    src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=400&fit=crop"
-                    alt="Vestido elegante 2"
-                    className="w-full aspect-[3/4] object-cover rounded-lg"
-                  />
-                  <img
-                    src="https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=300&h=400&fit=crop"
-                    alt="Vestido elegante 3"
-                    className="w-full aspect-[3/4] object-cover rounded-lg"
-                  />
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <h4 className="font-heading text-sm uppercase tracking-wide text-stone-500 mb-3">
-                  Hombres
-                </h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <img
-                    src="https://images.unsplash.com/photo-1507679799987-c73b4177fef0?w=300&h=400&fit=crop"
-                    alt="Traje elegante 1"
-                    className="w-full aspect-[3/4] object-cover rounded-lg"
-                  />
-                  <img
-                    src="https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=300&h=400&fit=crop"
-                    alt="Traje elegante 2"
-                    className="w-full aspect-[3/4] object-cover rounded-lg"
-                  />
-                  <img
-                    src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300&h=400&fit=crop"
-                    alt="Traje elegante 3"
-                    className="w-full aspect-[3/4] object-cover rounded-lg"
-                  />
-                </div>
-              </div>
+            <div className="p-6 overflow-y-auto overscroll-contain">
+              <DressCodeDetails />
 
               <button
                 type="button"
                 onClick={closeModal}
-                className="w-full py-2.5 px-4 bg-stone-800 text-white rounded-lg text-sm hover:bg-stone-700"
+                className="mt-8 w-full py-2.5 px-4 bg-stone-800 text-white rounded-lg text-sm hover:bg-stone-700"
               >
                 Cerrar
               </button>
@@ -380,7 +321,9 @@ export function PartySection() {
               <ul className="space-y-3 text-stone-600 text-sm list-none">
                 {party.tips.map((tip, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="text-stone-400 mt-0.5 shrink-0">•</span>
+                    <svg viewBox="0 0 14 14" aria-hidden className="w-3 h-3 mt-1.5 shrink-0">
+                      <path d="M7,1 C8,4 10,6 13,7 C10,8 8,10 7,13 C6,10 4,8 1,7 C4,6 6,4 7,1 Z" fill="#C3A265" opacity="0.7" />
+                    </svg>
                     <span>{tip}</span>
                   </li>
                 ))}

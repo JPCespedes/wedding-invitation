@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
+import { SectionHeading } from './SectionHeading'
+import { FloralSpray } from './ornaments/FloralSpray'
 
 const faqs = [
   {
@@ -46,7 +48,7 @@ function FaqItem({
   return (
     <motion.div
       className={`border-b border-stone-200 last:border-b-0 rounded-lg px-4 -mx-4 transition-colors duration-300 ${
-        isOpen ? 'bg-white' : ''
+        isOpen ? 'bg-white shadow-[0_1px_6px_rgba(17,42,67,0.05)]' : ''
       }`}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -58,13 +60,13 @@ function FaqItem({
         onClick={onToggle}
         className="w-full flex items-center justify-between gap-4 py-5 text-left group"
       >
-        <span className={`font-medium transition-colors ${isOpen ? 'text-stone-900' : 'text-stone-800 group-hover:text-stone-600'}`}>
+        <span className={`font-medium text-[15px] leading-snug transition-colors ${isOpen ? 'text-stone-900' : 'text-stone-800 group-hover:text-stone-600'}`}>
           {question}
         </span>
         <motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.25 }}
-          className={`shrink-0 transition-colors ${isOpen ? 'text-stone-700' : 'text-stone-400'}`}
+          className={`shrink-0 transition-colors ${isOpen ? 'text-terra-500' : 'text-stone-400'}`}
         >
           <ChevronDown size={20} />
         </motion.span>
@@ -78,7 +80,7 @@ function FaqItem({
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <p className="text-stone-600 text-sm leading-relaxed pb-5">
+            <p className="text-stone-600 text-[13.5px] leading-relaxed pb-5">
               {answer}
             </p>
           </motion.div>
@@ -96,24 +98,21 @@ export function FaqSection() {
   }
 
   return (
-    <section id="faq" className="py-16 px-6 bg-white">
-      <div className="max-w-2xl mx-auto">
-        <motion.div
-          className="text-center mb-10"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-        >
-          <h2 className="font-heading text-2xl md:text-3xl text-stone-800 mb-3">
-            Preguntas Frecuentes
-          </h2>
-          <p className="text-stone-500 italic">
-            Algunas cositas que tal vez te estés preguntando
-          </p>
-        </motion.div>
+    <section
+      id="faq"
+      className="relative py-16 sm:py-20 px-5 sm:px-6 bg-white overflow-hidden paper-grain"
+    >
+      <FloralSpray className="absolute -top-3 -right-7 w-36 sm:w-44" mirrored variant="sprig" />
 
-        <div className="bg-stone-50 rounded-2xl border border-stone-100 shadow-sm px-6">
+      <div className="relative max-w-2xl mx-auto">
+        <SectionHeading
+          eyebrow="Por si acaso"
+          title="Preguntas frecuentes"
+          subtitle="Algunas cositas que tal vez te estés preguntando"
+          className="mb-9 sm:mb-10"
+        />
+
+        <div className="bg-stone-50 rounded-2xl border border-gold-500/35 shadow-[0_2px_10px_rgba(17,42,67,0.05)] px-5 sm:px-6">
           {faqs.map((faq, i) => (
             <FaqItem
               key={faq.question}

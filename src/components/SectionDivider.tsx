@@ -4,46 +4,53 @@ interface SectionDividerProps {
   className?: string
 }
 
+/** Watercolour leaves flanking interlocking rings, on a gold hairline. */
 export function SectionDivider({ className = '' }: SectionDividerProps) {
   return (
-    <div className={`flex items-center justify-center py-6 ${className}`}>
-      <motion.div
-        className="flex items-center gap-3"
-        initial={{ opacity: 0, scale: 0.8 }}
+    <div className={`flex items-center justify-center py-8 ${className}`}>
+      <motion.svg
+        viewBox="0 0 240 44"
+        aria-hidden
+        focusable="false"
+        className="w-56 h-11"
+        initial={{ opacity: 0, scale: 0.9 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
-        <motion.span
-          className="block h-px w-12 bg-dusty-300"
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ transformOrigin: 'right' }}
-        />
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
+        <g filter="url(#orn-paint)" style={{ mixBlendMode: 'multiply' }}>
+          <ellipse cx="72" cy="22" rx="11" ry="6" className="fill-dusty-300" opacity="0.6" transform="rotate(-18 72 22)" />
+          <ellipse cx="54" cy="26" rx="10" ry="5.5" className="fill-dusty-200" opacity="0.55" transform="rotate(-8 54 26)" />
+          <ellipse cx="168" cy="22" rx="11" ry="6" className="fill-dusty-300" opacity="0.6" transform="rotate(18 168 22)" />
+          <ellipse cx="186" cy="26" rx="10" ry="5.5" className="fill-dusty-200" opacity="0.55" transform="rotate(8 186 26)" />
+          <circle cx="96" cy="22" r="9" className="fill-terra-300" opacity="0.55" />
+          <circle cx="144" cy="22" r="9" className="fill-terra-300" opacity="0.55" />
+        </g>
+        <motion.path
+          d="M6,22 H44"
+          stroke="url(#orn-gold)"
+          strokeWidth="0.9"
           fill="none"
-          className="text-dusty-400"
-        >
-          <path
-            d="M8 1.5l1.76 3.57 3.94.57-2.85 2.78.67 3.93L8 10.67l-3.52 1.68.67-3.93L2.3 5.64l3.94-.57L8 1.5z"
-            fill="currentColor"
-            opacity="0.5"
-          />
-        </svg>
-        <motion.span
-          className="block h-px w-12 bg-dusty-300"
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
+          initial={{ pathLength: 0 }}
+          whileInView={{ pathLength: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ transformOrigin: 'left' }}
+          transition={{ duration: 0.6, delay: 0.2 }}
         />
-      </motion.div>
+        <motion.path
+          d="M196,22 H234"
+          stroke="url(#orn-gold)"
+          strokeWidth="0.9"
+          fill="none"
+          initial={{ pathLength: 0 }}
+          whileInView={{ pathLength: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        />
+        <g fill="none" stroke="url(#orn-gold)" strokeWidth="1.5">
+          <circle cx="114" cy="22" r="7.5" />
+          <circle cx="126" cy="22" r="7.5" />
+        </g>
+      </motion.svg>
     </div>
   )
 }

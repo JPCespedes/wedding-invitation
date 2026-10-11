@@ -5,6 +5,7 @@ import { Check } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import { checkExistingRsvp } from '../features/rsvp/useGoogleFormSubmit'
 import { useInvitation } from '../features/rsvp/useInvitation'
+import { FloralSpray } from './ornaments/FloralSpray'
 
 const listVariants = {
   hidden: {},
@@ -43,9 +44,9 @@ export function InvitedGuests() {
 
   if (isLoading) {
     return (
-      <section id="invitados" className="py-16 px-6 bg-white">
+      <section id="invitados" className="py-16 px-6 bg-stone-50">
         <div className="max-w-md mx-auto text-center space-y-3">
-          <div className="w-14 h-14 rounded-full bg-stone-100 animate-pulse mx-auto" />
+          <div className="w-16 h-16 rounded-full bg-stone-100 animate-pulse mx-auto" />
           <div className="h-6 bg-stone-100 rounded-lg animate-pulse mx-auto w-32" />
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-12 bg-stone-100 rounded-lg animate-pulse" />
@@ -65,28 +66,36 @@ export function InvitedGuests() {
   const isConfirmed = confirmedGuests !== null
 
   return (
-    <section id="invitados" className="py-16 px-6 bg-white">
-      <div className="max-w-md mx-auto text-center">
+    <section
+      id="invitados"
+      className="relative py-16 sm:py-20 px-5 sm:px-6 bg-stone-50 overflow-hidden paper-grain"
+    >
+      <FloralSpray className="absolute -top-4 -right-8 w-36 sm:w-48" mirrored />
+
+      <div className="relative max-w-md md:max-w-xl mx-auto text-center">
         <motion.div
-          className="inline-flex flex-col items-center mb-4"
-          initial={{ opacity: 0, scale: 0.5 }}
+          className="inline-flex flex-col items-center gap-3 mb-5"
+          initial={{ opacity: 0, scale: 0.6 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ type: 'spring', stiffness: 200, damping: 15 }}
         >
-          <div
-            className="w-14 h-14 rounded-full border-2 border-stone-100 bg-stone-100 flex items-center justify-center text-stone-800 font-heading text-xl mb-3"
-            aria-hidden
-          >
-            {invitation.guests.length}
+          <div className="relative w-16 h-16 flex items-center justify-center" aria-hidden>
+            <svg viewBox="0 0 64 64" className="absolute inset-0 w-16 h-16">
+              <circle cx="32" cy="32" r="30" className="fill-terra-50" stroke="url(#orn-gold)" strokeWidth="1.1" />
+              <circle cx="32" cy="32" r="26" fill="none" stroke="url(#orn-gold)" strokeWidth="0.5" opacity="0.45" />
+            </svg>
+            <span className="relative font-heading text-2xl text-terra-600">
+              {invitation.guests.length}
+            </span>
           </div>
-          <h2 className="font-heading text-2xl md:text-3xl text-stone-800 uppercase tracking-wide">
+          <h2 className="font-heading text-2xl sm:text-3xl font-normal uppercase tracking-[0.16em] text-stone-800">
             Invitados
           </h2>
         </motion.div>
 
         <motion.ul
-          className="space-y-3 mt-6"
+          className="flex flex-col gap-2.5"
           variants={listVariants}
           initial="hidden"
           whileInView="visible"
@@ -99,27 +108,26 @@ export function InvitedGuests() {
             return (
               <motion.li key={name} variants={itemVariants}>
                 <span
-                  className={`flex items-center justify-between py-3 px-4 rounded-lg font-medium transition-colors ${
+                  className={`flex flex-col items-center gap-0.5 py-3 px-4 rounded-[3px] border transition-colors ${
                     attending === false
-                      ? 'bg-stone-50 text-stone-400 line-through'
-                      : 'bg-stone-100 text-stone-800'
+                      ? 'bg-stone-100/75 border-stone-300/50 border-l-2 border-l-stone-300 text-stone-500'
+                      : 'bg-terra-50/80 border-gold-500/30 border-l-2 border-l-gold-500 text-stone-800'
                   }`}
                 >
-                  <span>{name}</span>
+                  <span
+                    className={`font-heading italic text-xl leading-snug ${
+                      attending === false ? 'line-through' : ''
+                    }`}
+                  >
+                    {name}
+                  </span>
                   {attending === true && (
-                    <span className="flex items-center gap-1 text-xs text-terra-600 font-normal">
+                    <span className="flex items-center gap-1.5 text-xs text-terra-600">
                       <Check size={14} className="text-terra-500" />
                       Confirmado
                     </span>
                   )}
-                  {attending === false && (
-                    <span
-                      className="text-xs text-stone-400 font-normal"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      No asiste
-                    </span>
-                  )}
+                  {attending === false && <span className="text-xs text-stone-400">No asiste</span>}
                 </span>
               </motion.li>
             )
@@ -128,7 +136,7 @@ export function InvitedGuests() {
 
         {isConfirmed && (
           <motion.div
-            className="inline-flex items-center gap-2 bg-terra-500 text-white text-xs font-medium px-4 py-2 rounded-full mt-6"
+            className="inline-flex items-center gap-2 bg-terra-500 text-white text-xs font-medium px-4 py-2.5 rounded-full mt-6"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5 }}
@@ -139,7 +147,7 @@ export function InvitedGuests() {
         )}
 
         <motion.p
-          className="text-stone-500 text-sm mt-8"
+          className="font-heading italic font-light text-lg text-stone-600 mt-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

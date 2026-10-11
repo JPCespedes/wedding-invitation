@@ -1,44 +1,60 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-heading: 'Playfair Display', serif;
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-script: 'Great Vibes', cursive;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  /* Wedding palette: warm cream backgrounds → dusty blue text/interactive */
-  --color-stone-50:  #FAF9F7;
-  --color-stone-100: #F0EEEB;
-  --color-stone-200: #E2DED8;
-  --color-stone-300: #BFC8CF;
-  --color-stone-400: #93A5B2;
-  --color-stone-500: #7B90A0;
-  --color-stone-600: #5A6F7E;
-  --color-stone-700: #4B5F6D;
-  --color-stone-800: #394D5A;
-  --color-stone-900: #283C48;
+  /* Wedding palette: terracotta #AD5531 (terra-500) and blue #203E5C
+     (stone-800, dusty-600). Every other step was derived from those two in
+     OKLCH, keeping the lightness ladder of the previous palette so the page
+     hierarchy holds. The watercolour ornaments read these through fill-/
+     stroke- classes, but the rgba() shadows in components (stone-900 and
+     terra-500) and public/favicon.svg are copied by hand: update them too. */
 
-  /* Dusty blue from wedding palette for secondary buttons & accents */
-  --color-dusty-50:  #EFF5F8;
-  --color-dusty-100: #DCE9F0;
-  --color-dusty-200: #B9D2E0;
-  --color-dusty-300: #A8C4D8;
-  --color-dusty-400: #93B0C3;
-  --color-dusty-500: #7E9BAF;
-  --color-dusty-600: #6B8799;
-  --color-dusty-700: #586F7F;
-  --color-dusty-800: #455A67;
-  --color-dusty-900: #334550;
+  /* Warm ivory paper (50–200) → navy ink (300–900); headings use 800. */
+  --color-stone-50:  #FCF9F5;
+  --color-stone-100: #F3EEE8;
+  --color-stone-200: #E5DDD5;
+  --color-stone-300: #C0C8D2;
+  --color-stone-400: #8696A6;
+  --color-stone-500: #687B8F;
+  --color-stone-600: #4D637A;
+  --color-stone-700: #37516B;
+  --color-stone-800: #203E5C;
+  --color-stone-900: #112A43;
 
-  /* Terracotta/salmon accent for CTAs */
-  --color-terra-50:  #FDF6F0;
-  --color-terra-100: #FAE8D8;
-  --color-terra-200: #F2CEAE;
-  --color-terra-300: #D4A589;
-  --color-terra-400: #C48A5F;
-  --color-terra-500: #B87340;
-  --color-terra-600: #9C6237;
-  --color-terra-700: #7D4E2C;
-  --color-terra-800: #5E3B21;
-  --color-terra-900: #3F2715;
+  /* Wedding blue: tints for chips and eucalyptus leaves, 600 for secondary
+     buttons and the credits band. */
+  --color-dusty-50:  #EFF4F9;
+  --color-dusty-100: #DEE7F2;
+  --color-dusty-200: #BED0E4;
+  --color-dusty-300: #A4BCD5;
+  --color-dusty-400: #7E9BBA;
+  --color-dusty-500: #4B6C8E;
+  --color-dusty-600: #203E5C;
+  --color-dusty-700: #152F4A;
+  --color-dusty-800: #0D2339;
+  --color-dusty-900: #061728;
+
+  /* Wedding terracotta: CTAs, icons and accents; tints for roses and grounds. */
+  --color-terra-50:  #FFF6EF;
+  --color-terra-100: #FDE7D9;
+  --color-terra-200: #F6CCB4;
+  --color-terra-300: #E0A082;
+  --color-terra-400: #C97956;
+  --color-terra-500: #AD5531;
+  --color-terra-600: #934223;
+  --color-terra-700: #76341C;
+  --color-terra-800: #592715;
+  --color-terra-900: #3E1B0D;
+
+  /* Soft gold — ornaments only: rings, rules, borders, monogram.
+     Never body text: it fails contrast at small sizes. */
+  --color-gold-100: #E3CFA0;
+  --color-gold-300: #D4BC84;
+  --color-gold-500: #C3A265;
+  --color-gold-700: #A8823F;
 }
 
 @layer base {
@@ -54,6 +70,12 @@
   button, [role="button"], a[href] {
     cursor: pointer;
   }
+  /* Respect users who ask for less motion: the hero video stops looping. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
 }
 
 @keyframes progress-ring {
@@ -65,6 +87,32 @@
   }
 }
 
+/* Duration is set inline from AUTO_PLAY_INTERVAL in Gallery.tsx. */
 .animate-progress-ring {
-  animation: progress-ring 5s linear;
+  animation: progress-ring linear;
+}
+
+/* Paper grain. Put on a `relative` element; paints over its background but
+   under its content, and never intercepts clicks.
+   Deliberately does NOT set `position` on its children: doing so overrides
+   the `absolute` on backdrop photos and corner bouquets. Each section is
+   responsible for wrapping its own content in a positioned element, which
+   then paints after this pseudo-element in tree order. */
+.paper-grain {
+  position: relative;
+}
+.paper-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.2;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Hacienda arch — rounded top, squared base. Scales with the element. */
+.arch-frame {
+  border-radius: 45% 45% 0.75rem 0.75rem / 38% 38% 0.75rem 0.75rem;
 }

@@ -1,11 +1,21 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { motion, AnimatePresence, type PanInfo } from 'framer-motion'
+import {
+  motion,
+  AnimatePresence,
+  useInView,
+  usePageInView,
+  type PanInfo,
+} from 'framer-motion'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import { invitationData } from '../data/invitation'
+import { SectionHeading } from './SectionHeading'
+import { FloralSpray } from './ornaments/FloralSpray'
 
 const SWIPE_THRESHOLD = 50
-const AUTO_PLAY_INTERVAL = 5000
+// How long each photo stays up. The progress ring on the active dot reads
+// this too, so the two can't drift apart.
+const AUTO_PLAY_INTERVAL = 4000
 
 export function Gallery() {
   const { gallery, gallerySubtitle } = invitationData
@@ -15,8 +25,17 @@ export function Gallery() {
   const closeModal = useAppStore((s) => s.closeModal)
 
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const carouselRef = useRef<HTMLDivElement>(null)
+
+  // Plays while the carousel overlaps the middle half of the screen. No
+  // hover or touch pause on purpose: the cursor or a finger lands on the
+  // photos just from scrolling to them, which used to freeze it right
+  // when you stopped to look.
+  const isInView = useInView(carouselRef, { margin: '-25% 0px -25% 0px' })
+  const isPageVisible = usePageInView()
+  const isLightboxOpen = openModalId === 'gallery' && galleryIndex !== null
+  const isPlaying = isInView && isPageVisible && !isDragging && !isLightboxOpen
 
   const getWrappedIndex = useCallback(
     (index: number) => ((index % gallery.length) + gallery.length) % gallery.length,
@@ -30,19 +49,17 @@ export function Gallery() {
     [getWrappedIndex],
   )
 
-  // Auto-play
+  // Auto-play. Restarts on every slide change, so a photo picked by hand
+  // also gets the full interval before moving on.
   useEffect(() => {
-    if (isPaused) return
-    timerRef.current = setInterval(() => {
-      setCurrentSlide((prev) => getWrappedIndex(prev + 1))
-    }, AUTO_PLAY_INTERVAL)
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-    }
-  }, [isPaused, getWrappedIndex])
+    if (!isPlaying) return
+    const timer = setTimeout(() => paginate(1), AUTO_PLAY_INTERVAL)
+    return () => clearTimeout(timer)
+  }, [isPlaying, currentSlide, paginate])
 
   const handleDragEnd = useCallback(
     (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      setIsDragging(false)
       if (info.offset.x < -SWIPE_THRESHOLD) paginate(1)
       else if (info.offset.x > SWIPE_THRESHOLD) paginate(-1)
     },
@@ -61,7 +78,6 @@ export function Gallery() {
     openModal('gallery', { galleryIndex: getWrappedIndex(galleryIndex + 1) })
   }
 
-  const isLightboxOpen = openModalId === 'gallery' && galleryIndex !== null
   const currentImage = galleryIndex !== null ? gallery[galleryIndex] : null
 
   const prevIndex = getWrappedIndex(currentSlide - 1)
@@ -74,29 +90,22 @@ export function Gallery() {
   }
 
   return (
-    <section id="gallery" className="py-16 bg-stone-50 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4">
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-        >
-          <h2 className="font-heading text-2xl md:text-3xl text-stone-800 mb-2">
-            Retratos de Nuestro Amor
-          </h2>
-          <p className="text-stone-500 italic">{gallerySubtitle}</p>
-        </motion.div>
+    <section
+      id="gallery"
+      className="relative py-16 sm:py-20 bg-terra-50 overflow-hidden paper-grain"
+    >
+      <FloralSpray className="absolute -bottom-4 -left-7 w-40 sm:w-52" />
+
+      <div className="relative max-w-6xl mx-auto px-4">
+        <SectionHeading
+          eyebrow="Nuestra historia"
+          title="Galería"
+          subtitle={gallerySubtitle}
+          className="mb-10 sm:mb-12"
+        />
 
         {/* Carousel */}
-        <div
-          className="relative"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
-        >
+        <div ref={carouselRef} className="relative">
           {/* 3 visible images */}
           <div className="relative flex items-center gap-3 sm:gap-4 md:gap-6">
             {/* Left image */}
@@ -104,11 +113,11 @@ export function Gallery() {
               className="w-[22%] sm:w-[24%] shrink-0 cursor-pointer"
               onClick={() => paginate(-1)}
             >
-              <div className="aspect-[3/4] rounded-xl overflow-hidden bg-white shadow-md border border-stone-200 p-1.5 sm:p-2 opacity-50 scale-95 hover:opacity-70 transition-all">
+              <div className="arch-frame aspect-[3/4] overflow-hidden bg-white shadow-md border border-gold-500/35 p-1.5 sm:p-2 opacity-50 scale-95 hover:opacity-70 transition-all">
                 <img
                   src={gallery[prevIndex].src}
                   alt={gallery[prevIndex].alt}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="arch-frame w-full h-full object-cover"
                   loading="lazy"
                   draggable={false}
                   onError={(e) => {
@@ -127,10 +136,11 @@ export function Gallery() {
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.5}
+                onDragStart={() => setIsDragging(true)}
                 onDragEnd={handleDragEnd}
               >
                 <div
-                  className="aspect-[3/4] rounded-xl overflow-hidden bg-white shadow-xl border border-stone-200 p-2 sm:p-3 relative"
+                  className="arch-frame aspect-[3/4] overflow-hidden bg-white shadow-xl border border-gold-500/45 p-2 sm:p-3 relative"
                   onClick={() => openModal('gallery', { galleryIndex: currentSlide })}
                 >
                   <AnimatePresence initial={false} mode="sync">
@@ -138,7 +148,7 @@ export function Gallery() {
                       key={currentSlide}
                       src={gallery[currentSlide].src}
                       alt={gallery[currentSlide].alt}
-                      className="absolute inset-2 sm:inset-3 w-[calc(100%-1rem)] sm:w-[calc(100%-1.5rem)] h-[calc(100%-1rem)] sm:h-[calc(100%-1.5rem)] object-cover rounded-lg"
+                      className="arch-frame absolute inset-2 sm:inset-3 w-[calc(100%-1rem)] sm:w-[calc(100%-1.5rem)] h-[calc(100%-1rem)] sm:h-[calc(100%-1.5rem)] object-cover"
                       variants={slideVariants}
                       initial="enter"
                       animate="center"
@@ -161,11 +171,11 @@ export function Gallery() {
               className="w-[22%] sm:w-[24%] shrink-0 cursor-pointer"
               onClick={() => paginate(1)}
             >
-              <div className="aspect-[3/4] rounded-xl overflow-hidden bg-white shadow-md border border-stone-200 p-1.5 sm:p-2 opacity-50 scale-95 hover:opacity-70 transition-all">
+              <div className="arch-frame aspect-[3/4] overflow-hidden bg-white shadow-md border border-gold-500/35 p-1.5 sm:p-2 opacity-50 scale-95 hover:opacity-70 transition-all">
                 <img
                   src={gallery[nextIndex].src}
                   alt={gallery[nextIndex].alt}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="arch-frame w-full h-full object-cover"
                   loading="lazy"
                   draggable={false}
                   onError={(e) => {
@@ -186,13 +196,13 @@ export function Gallery() {
                 onClick={() => setCurrentSlide(index)}
                 className={`relative rounded-full transition-all duration-500 ${
                   index === currentSlide
-                    ? 'w-3 h-3 bg-stone-700'
+                    ? 'w-3 h-3 bg-terra-500'
                     : 'w-3 h-3 bg-stone-300 hover:bg-stone-400'
                 }`}
                 aria-label={`Ir a foto ${index + 1}`}
               >
                 {/* Progress ring on active dot */}
-                {index === currentSlide && !isPaused && (
+                {index === currentSlide && isPlaying && (
                   <svg
                     className="absolute -inset-1 w-5 h-5"
                     viewBox="0 0 20 20"
@@ -214,10 +224,11 @@ export function Gallery() {
                       stroke="currentColor"
                       strokeWidth="1.5"
                       strokeDasharray={2 * Math.PI * 8}
-                      className="text-stone-700 animate-progress-ring"
+                      className="text-terra-500 animate-progress-ring"
                       style={{
                         transformOrigin: 'center',
                         transform: 'rotate(-90deg)',
+                        animationDuration: `${AUTO_PLAY_INTERVAL}ms`,
                       }}
                     />
                   </svg>
