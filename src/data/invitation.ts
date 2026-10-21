@@ -9,7 +9,7 @@ export const invitationData = {
   couple: {
     groomName: 'Pablo',
     brideName: 'May',
-    dateISO: '2027-01-29T15:00:00',
+    dateISO: '2027-01-29T14:30:00',
     quote:
       'A partir del 29 de enero de 2027 nuestras vidas se unen para siempre y queremos que nos acompañes en el inicio del nuevo camino.',
   },
@@ -17,7 +17,7 @@ export const invitationData = {
     {
       id: 'ceremonia',
       title: 'Ceremonia',
-      datetimeISO: '2027-01-29T15:00:00',
+      datetimeISO: '2027-01-29T14:30:00',
       venueName: 'Parroquia Santa Ana',
       address: 'Santa Ana',
       mapsQuery: "9.9324436,-84.1805954"
@@ -60,8 +60,8 @@ export const invitationData = {
     hotelName: 'El Rodeo Estancia Boutique Hotel',
     description:
       'El lugar de nuestra celebración cuenta con un hotel boutique familiar con más de 40 años de tradición, donde podrás hospedarte con tarifas preferenciales por ser nuestro invitado.',
-    coupon: 'XXXXX',
-    couponNote: 'Utilizá este cupón al reservar para obtener la tarifa preferencial. Los detalles del cupón serán compartidos próximamente.',
+    coupon: '#37459',
+    couponNote: 'Utilizá este cupón al reservar para obtener la tarifa preferencial.',
     phone: '+506 2293-3909',
     email: 'info@elrodeohotel.com',
     bookingUrl: 'https://elrodeohotel.com/rooms.html',
