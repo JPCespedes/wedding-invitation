@@ -1,13 +1,30 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Check, Loader2, CalendarCheck, UserCheck, UserX } from 'lucide-react'
+import { X, Check, Loader2, CalendarCheck, UserCheck, UserX, PencilLine } from 'lucide-react'
 import { useAppStore } from '../../store/useAppStore'
 import { rsvpSchema, type RsvpFormValues, type GuestEntry } from './rsvpSchema'
-import { submitRsvp, checkExistingRsvp, deleteRsvp } from './useGoogleFormSubmit'
+import { saveRsvp } from './useGoogleFormSubmit'
 import { useInvitation } from './useInvitation'
+import { useRsvpStatus, describeAttendance } from './useRsvpStatus'
+
+/**
+ * Quién está invitado lo manda la invitación, no la respuesta anterior: si los
+ * novios agregaron o quitaron a alguien desde el panel después de que esta
+ * familia confirmara, la lista nueva es la que vale. De la respuesta guardada
+ * solo arrastramos lo que la persona eligió, emparejando por nombre.
+ */
+function buildFormGuests(names: string[], saved: GuestEntry[] | null): GuestEntry[] {
+  return names.map((name) => {
+    const previous = saved?.find((g) => g.name === name)
+    return {
+      name,
+      attending: previous?.attending ?? true,
+      message: previous?.message ?? '',
+    }
+  })
+}
 
 function GuestCard({
   guest,
@@ -108,30 +125,22 @@ function ConfirmedGuestList({ guests }: { guests: GuestEntry[] }) {
 }
 
 export function RsvpModal() {
-  const [searchParams] = useSearchParams()
   const openModal = useAppStore((s) => s.openModal)
   const closeModal = useAppStore((s) => s.closeModal)
-  const setStoreConfirmedGuests = useAppStore((s) => s.setConfirmedGuests)
+  const setConfirmedGuests = useAppStore((s) => s.setConfirmedGuests)
   const isOpen = openModal === 'rsvp'
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isChecking, setIsChecking] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [alreadyConfirmed, setAlreadyConfirmed] = useState(false)
-  const [confirmedGuests, setConfirmedGuests] = useState<GuestEntry[]>([])
-  const [submitError, setSubmitError] = useState<string | null>(null)
-
-  const code = searchParams.get('invitacion')?.toLowerCase().trim()
-
-  // Fetch invitation data from Supabase
+  const { code, confirmedGuests, isConfirmed, isLoaded } = useRsvpStatus()
   const { invitation, isLoading: isLoadingInvitation } = useInvitation(code)
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [saved, setSaved] = useState<'created' | 'updated' | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const { handleSubmit, control, setValue, watch, reset } = useForm<RsvpFormValues>({
     resolver: zodResolver(rsvpSchema),
-    defaultValues: {
-      guests: [],
-      invitationCode: code ?? '',
-    },
+    defaultValues: { guests: [], invitationCode: code ?? '' },
   })
 
   const { fields } = useFieldArray({ control, name: 'guests' })
@@ -149,64 +158,60 @@ export function RsvpModal() {
     setValue(`guests.${index}.message`, value)
   }
 
+  const isReady = isLoaded && !isLoadingInvitation
+
+  // Cada apertura empieza limpia: quien ya confirmó ve primero su respuesta, y
+  // quien no, el formulario con todos marcados como asistentes.
   useEffect(() => {
-    if (!isOpen || !code || isLoadingInvitation) return
+    if (!isOpen || !isReady) return
 
-    setSubmitted(false)
+    setSaved(null)
     setSubmitError(null)
-    setAlreadyConfirmed(false)
-    setConfirmedGuests([])
+    setIsEditing(!isConfirmed)
 
-    setIsChecking(true)
-    checkExistingRsvp(code).then((result) => {
-      setIsChecking(false)
-      if (result.exists && result.guests) {
-        setAlreadyConfirmed(true)
-        setConfirmedGuests(result.guests)
-        setStoreConfirmedGuests(result.guests)
-      } else if (invitation?.guests?.length) {
-        const initial: GuestEntry[] = invitation.guests.map((name) => ({
-          name,
-          attending: true,
-          message: '',
-        }))
-        setValue('guests', initial)
-        setValue('invitationCode', code)
-      }
-    })
-  }, [isOpen, code, isLoadingInvitation, invitation, setValue, setStoreConfirmedGuests])
+    if (invitation?.guests?.length) {
+      setValue('guests', buildFormGuests(invitation.guests, confirmedGuests))
+      setValue('invitationCode', code ?? '')
+    }
+    // `confirmedGuests` queda fuera a propósito: al guardar cambia y volvería a
+    // reiniciar el formulario encima de la pantalla de éxito.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isReady])
+
+  const startEditing = () => {
+    setSubmitError(null)
+    if (invitation?.guests?.length) {
+      setValue('guests', buildFormGuests(invitation.guests, confirmedGuests))
+    }
+    setIsEditing(true)
+  }
 
   const onSubmit = async (values: RsvpFormValues) => {
     setIsSubmitting(true)
     setSubmitError(null)
 
-    const result = await submitRsvp(values)
+    const wasConfirmed = isConfirmed
+    const result = await saveRsvp(values)
     setIsSubmitting(false)
 
-    if (result.alreadyConfirmed) {
-      setAlreadyConfirmed(true)
+    if (result.success) {
+      // El store es lo que leen el botón de la página y la lista de invitados,
+      // así que la invitación entera refleja el cambio sin recargar.
       setConfirmedGuests(values.guests)
-      setStoreConfirmedGuests(values.guests)
+      setSaved(wasConfirmed ? 'updated' : 'created')
+      setTimeout(closeModal, 2500)
       return
     }
 
-    if (result.success) {
-      setSubmitted(true)
-      setStoreConfirmedGuests(values.guests)
-      setTimeout(() => {
-        reset({ guests: [], invitationCode: '' })
-        setSubmitted(false)
-        closeModal()
-      }, 2500)
-    } else {
-      setSubmitError('Hubo un error al enviar. Por favor intentá de nuevo.')
-    }
+    // Si falla, la respuesta anterior sigue intacta en la base: el upsert no
+    // llegó a escribir nada, así que basta con reintentar.
+    setSubmitError('Hubo un error al enviar. Por favor intentá de nuevo.')
   }
 
   const attendingCount = guests.filter((g) => g.attending).length
 
   const renderContent = () => {
-    if (isChecking || isLoadingInvitation) {
+    if (!isReady) {
       return (
         <div className="py-12 flex flex-col items-center">
           <Loader2 size={32} className="animate-spin text-stone-400 mb-4" />
@@ -215,66 +220,7 @@ export function RsvpModal() {
       )
     }
 
-    if (alreadyConfirmed) {
-      return (
-        <motion.div
-          className="py-8 text-center"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <div className="w-16 h-16 rounded-full bg-terra-50 flex items-center justify-center mx-auto mb-4">
-            <CalendarCheck className="text-terra-600" size={32} />
-          </div>
-          <h3 className="font-heading text-xl text-stone-800 mb-2">
-            Invitación ya confirmada
-          </h3>
-          <p className="text-stone-600 mb-4">
-            Esta invitación ya fue confirmada anteriormente.
-          </p>
-          <ConfirmedGuestList guests={confirmedGuests} />
-          <div className="flex flex-col gap-2 mt-6">
-            <button
-              type="button"
-              onClick={closeModal}
-              className="py-3 px-8 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-700 transition"
-            >
-              Cerrar
-            </button>
-            {code === 'garcia' && (
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!code) return
-                  setIsSubmitting(true)
-                  const result = await deleteRsvp(code)
-                  setIsSubmitting(false)
-                  if (result.success) {
-                    setAlreadyConfirmed(false)
-                    setConfirmedGuests([])
-                    setStoreConfirmedGuests(null)
-                    if (invitation?.guests?.length) {
-                      const initial: GuestEntry[] = invitation.guests.map((name) => ({
-                        name,
-                        attending: true,
-                        message: '',
-                      }))
-                      setValue('guests', initial)
-                      setValue('invitationCode', code)
-                    }
-                  }
-                }}
-                disabled={isSubmitting}
-                className="py-2 px-4 text-stone-400 text-xs hover:text-stone-600 transition disabled:opacity-60"
-              >
-                {isSubmitting ? 'Eliminando...' : 'Desconfirmar (solo pruebas)'}
-              </button>
-            )}
-          </div>
-        </motion.div>
-      )
-    }
-
-    if (submitted) {
+    if (saved) {
       return (
         <motion.div
           className="py-12 text-center"
@@ -284,8 +230,60 @@ export function RsvpModal() {
           <div className="w-16 h-16 rounded-full bg-terra-50 flex items-center justify-center mx-auto mb-4">
             <Check className="text-terra-600" size={32} />
           </div>
-          <h3 className="font-heading text-xl text-stone-800 mb-2">¡Confirmado!</h3>
-          <p className="text-stone-600">Gracias por confirmar. ¡Los esperamos!</p>
+          <h3 className="font-heading text-xl text-stone-800 mb-2">
+            {saved === 'updated' ? '¡Respuesta actualizada!' : '¡Confirmado!'}
+          </h3>
+          <p className="text-stone-600">
+            {saved === 'updated'
+              ? 'Guardamos tu cambio. Podés volver a modificarlo cuando quieras.'
+              : 'Gracias por confirmar. ¡Los esperamos!'}
+          </p>
+        </motion.div>
+      )
+    }
+
+    // Respuesta ya guardada: primero se muestra, y solo se entra a editar a
+    // propósito. Así nadie sobrescribe lo que había sin haberlo visto antes.
+    if (isConfirmed && confirmedGuests && !isEditing) {
+      return (
+        <motion.div
+          className="py-6 text-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <div className="w-16 h-16 rounded-full bg-terra-50 flex items-center justify-center mx-auto mb-4">
+            <CalendarCheck className="text-terra-600" size={32} />
+          </div>
+          <h3 className="font-heading text-xl text-stone-800 mb-1">
+            Tu asistencia ya está confirmada
+          </h3>
+          <p className="text-stone-500 text-sm mb-5">
+            {describeAttendance(confirmedGuests)}. Esto es lo que nos enviaste:
+          </p>
+
+          <ConfirmedGuestList guests={confirmedGuests} />
+
+          {submitError && (
+            <p className="text-sm text-rose-600 mt-4">{submitError}</p>
+          )}
+
+          <div className="flex flex-col gap-2 mt-6">
+            <button
+              type="button"
+              onClick={startEditing}
+              className="inline-flex items-center justify-center gap-2 py-3 px-8 bg-terra-500 text-white rounded-lg font-medium hover:bg-terra-600 transition"
+            >
+              <PencilLine size={17} />
+              Modificar respuesta
+            </button>
+            <button
+              type="button"
+              onClick={closeModal}
+              className="py-2.5 px-8 text-stone-500 rounded-lg text-sm font-medium hover:bg-stone-100 transition"
+            >
+              Cerrar
+            </button>
+          </div>
         </motion.div>
       )
     }
@@ -294,7 +292,7 @@ export function RsvpModal() {
       <>
         <div className="flex justify-between items-center mb-6">
           <h2 id="rsvp-title" className="text-xl font-heading font-semibold text-stone-800">
-            Confirmar asistencia
+            {isConfirmed ? 'Modificar respuesta' : 'Confirmar asistencia'}
           </h2>
           <button
             type="button"
@@ -322,7 +320,9 @@ export function RsvpModal() {
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
             <p className="text-xs text-stone-500 mb-1">
-              Indicá quién asiste y dejá un mensaje individual si es necesario.
+              {isConfirmed
+                ? 'Cambiá lo que necesités y guardá: reemplaza la respuesta anterior.'
+                : 'Indicá quién asiste y dejá un mensaje individual si es necesario.'}
             </p>
 
             <div className="space-y-3">
@@ -346,7 +346,7 @@ export function RsvpModal() {
               <p className="text-sm text-rose-600 text-center">{submitError}</p>
             )}
 
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col gap-2">
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -355,12 +355,28 @@ export function RsvpModal() {
                 {isSubmitting ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
-                    Enviando...
+                    Guardando...
                   </>
+                ) : isConfirmed ? (
+                  'Guardar cambios'
                 ) : (
                   'Confirmar asistencia'
                 )}
               </button>
+
+              {isConfirmed && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmitError(null)
+                    setIsEditing(false)
+                  }}
+                  disabled={isSubmitting}
+                  className="w-full py-2.5 px-4 text-stone-500 rounded-lg text-sm font-medium hover:bg-stone-100 transition disabled:opacity-60"
+                >
+                  Cancelar
+                </button>
+              )}
             </div>
           </form>
         )}
@@ -376,6 +392,12 @@ export function RsvpModal() {
       document.body.style.overflow = original
     }
   }, [isOpen])
+
+  // Al cerrarse se suelta el formulario, para que la próxima apertura lo
+  // reconstruya desde la respuesta vigente y no desde lo que quedó a medias.
+  useEffect(() => {
+    if (!isOpen) reset({ guests: [], invitationCode: code ?? '' })
+  }, [isOpen, reset, code])
 
   return (
     <AnimatePresence>

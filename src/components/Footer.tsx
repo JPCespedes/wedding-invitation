@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion'
-import { Gift, Copy, Check, Calendar, Music, CheckCircle, Linkedin, X, Loader2 } from 'lucide-react'
+import { Gift, Copy, Check, Calendar, Music, Linkedin, X, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { useAppStore } from '../store/useAppStore'
 import { invitationData } from '../data/invitation'
 import { getGoogleCalendarUrl, downloadIcs } from '../utils/calendarLinks'
 import { submitSongSuggestion } from '../features/rsvp/useGoogleFormSubmit'
+import { RsvpCta } from '../features/rsvp/RsvpCta'
 import { FaqSection } from './FaqSection'
 import { SectionHeading } from './SectionHeading'
 import { FloralSpray } from './ornaments/FloralSpray'
@@ -16,7 +16,6 @@ type Account = { key: AccountKey; label: string; value: string }
 
 export function Footer() {
   const [copied, setCopied] = useState<AccountKey | null>(null)
-  const openModal = useAppStore((s) => s.openModalAction)
   const [showSongModal, setShowSongModal] = useState(false)
   const [songName, setSongName] = useState('')
   const [suggestedBy, setSuggestedBy] = useState('')
@@ -195,14 +194,7 @@ export function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
           >
-            <button
-              type="button"
-              onClick={() => openModal('rsvp', { eventId: 'celebracion' })}
-              className="inline-flex items-center justify-center gap-2 py-3.5 px-5 bg-terra-500 text-white rounded-lg text-sm font-medium hover:bg-terra-600 transition shadow-[0_2px_8px_rgba(173,85,49,0.3)]"
-            >
-              <CheckCircle size={18} />
-              Confirmar asistencia a celebración
-            </button>
+            <RsvpCta variant="footer" />
             {/* Either one row or a stack, both flush with the button above: three
                 abreast only fit once the column reaches ~460px (lg). */}
             <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap">

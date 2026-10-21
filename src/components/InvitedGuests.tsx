@@ -1,9 +1,6 @@
-import { useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Check } from 'lucide-react'
-import { useAppStore } from '../store/useAppStore'
-import { checkExistingRsvp } from '../features/rsvp/useGoogleFormSubmit'
+import { useRsvpStatus } from '../features/rsvp/useRsvpStatus'
 import { useInvitation } from '../features/rsvp/useInvitation'
 import { FloralSpray } from './ornaments/FloralSpray'
 
@@ -24,21 +21,9 @@ const itemVariants = {
 }
 
 export function InvitedGuests() {
-  const [searchParams] = useSearchParams()
-  const code = searchParams.get('invitacion')?.toLowerCase().trim()
-  const confirmedGuests = useAppStore((s) => s.confirmedGuests)
-  const setConfirmedGuests = useAppStore((s) => s.setConfirmedGuests)
+  const { code, confirmedGuests, isConfirmed } = useRsvpStatus()
 
   const { invitation, isLoading } = useInvitation(code)
-
-  useEffect(() => {
-    if (!code || confirmedGuests !== null) return
-    checkExistingRsvp(code).then((result) => {
-      if (result.exists && result.guests) {
-        setConfirmedGuests(result.guests)
-      }
-    })
-  }, [code, confirmedGuests, setConfirmedGuests])
 
   if (!code) return null
 
@@ -62,8 +47,6 @@ export function InvitedGuests() {
     if (!confirmedGuests) return null
     return confirmedGuests.find((g) => g.name === name) ?? null
   }
-
-  const isConfirmed = confirmedGuests !== null
 
   return (
     <section

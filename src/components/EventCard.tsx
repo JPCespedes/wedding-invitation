@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale'
 import { invitationData } from '../data/invitation'
 import { getGoogleCalendarUrl, downloadIcs } from '../utils/calendarLinks'
 import { getGoogleMapsDirectionsUrl } from '../utils/mapLinks'
-import { useAppStore } from '../store/useAppStore'
+import { RsvpCta } from '../features/rsvp/RsvpCta'
 import { FloralSpray } from './ornaments/FloralSpray'
 
 type Event = (typeof invitationData.events)[number]
@@ -35,15 +35,10 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, index = 0 }: EventCardProps) {
-  const openModal = useAppStore((s) => s.openModalAction)
   const date = new Date(event.datetimeISO)
   const formattedDate = format(date, "EEEE d 'de' MMMM · h:mm a", { locale: es })
   const accent = accentByEventId[event.id]
   const VenueIcon = venueIconByEventId[event.id]
-
-  const handleRsvp = () => {
-    openModal('rsvp', { eventId: event.id })
-  }
 
   const handleAgendar = () => {
     window.open(getGoogleCalendarUrl(event), '_blank')
@@ -112,15 +107,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
         {/* The primary action gets its own row: three buttons abreast do not
             fit at tablet width, where the grid is already two columns. */}
         <div className="mt-auto pt-7 flex flex-col gap-2.5">
-          {event.id === 'celebracion' && (
-            <button
-              type="button"
-              onClick={handleRsvp}
-              className="w-full py-3 px-4 bg-terra-500 text-white rounded-lg font-medium hover:bg-terra-600 transition shadow-[0_2px_8px_rgba(173,85,49,0.28)]"
-            >
-              Confirmar asistencia
-            </button>
-          )}
+          {event.id === 'celebracion' && <RsvpCta />}
           <div className="flex gap-2.5">
             <button type="button" onClick={handleAgendar} className={secondaryButton}>
               Agendar

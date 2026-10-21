@@ -22,35 +22,29 @@ export async function checkExistingRsvp(
   return { exists: false }
 }
 
-export async function submitRsvp(
+/**
+ * Guarda la respuesta de una invitación, tanto la primera vez como cuando
+ * alguien vuelve a cambiarla.
+ *
+ * Una sola escritura: la restricción `unique_invitation_code` hace que un
+ * segundo guardado sobre el mismo código actualice la fila en vez de duplicarla.
+ * Como no tocamos `created_at`, esa columna sigue marcando cuándo confirmaron
+ * por primera vez. De `updated_at` se encarga la base —`now()` por defecto al
+ * insertar y un trigger al actualizar—, para no depender del reloj del visitante.
+ */
+export async function saveRsvp(
   values: RsvpFormValues,
-): Promise<{ success: boolean; alreadyConfirmed?: boolean; error?: string }> {
-  const { error } = await supabase.from('rsvp_confirmations').insert({
-    invitation_code: values.invitationCode ?? null,
-    guests: values.guests,
-  })
-
-  if (error) {
-    if (error.code === '23505') {
-      return { success: false, alreadyConfirmed: true }
-    }
-    console.error('Supabase RSVP error:', error)
-    return { success: false, error: error.message }
-  }
-
-  return { success: true }
-}
-
-export async function deleteRsvp(
-  invitationCode: string,
 ): Promise<{ success: boolean; error?: string }> {
-  const { error } = await supabase
-    .from('rsvp_confirmations')
-    .delete()
-    .eq('invitation_code', invitationCode)
+  const { error } = await supabase.from('rsvp_confirmations').upsert(
+    {
+      invitation_code: values.invitationCode?.trim() || null,
+      guests: values.guests,
+    },
+    { onConflict: 'invitation_code' },
+  )
 
   if (error) {
-    console.error('Supabase delete RSVP error:', error)
+    console.error('Supabase RSVP error:', error)
     return { success: false, error: error.message }
   }
 
