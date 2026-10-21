@@ -53,7 +53,16 @@ jobs:
 
           case "${key}" in
             eyJ*)
-              echo "Formato de la key: JWT anon, correcto." ;;
+              # Un JWT son tres segmentos separados por puntos y unos 200 y pico
+              # de caracteres. Si el copiado se corta en el primer punto quedan
+              # 36, que siguen empezando con eyJ y parecen válidos de reojo.
+              segmentos=$(printf '%s' "${key}" | awk -F. '{print NF}')
+              if [ "${segmentos}" -ne 3 ] || [ "${#key}" -lt 100 ]; then
+                echo "Formato de la key: JWT incompleto. Tiene ${segmentos} de 3 segmentos y ${#key} caracteres, cuando lo normal son más de 200."
+                echo "El copiado se cortó. Volvé a copiar la anon key entera, de una sola vez."
+                exit 1
+              fi
+              echo "Formato de la key: JWT anon completo, correcto." ;;
             sb_publishable_*)
               echo "Formato de la key: publishable, correcto." ;;
             sb_secret_*|service_role*)
