@@ -17,6 +17,7 @@ import {
   Loader2,
   Users,
   ChevronsUpDown,
+  Utensils,
 } from 'lucide-react'
 import { useAdminData, type AdminRow, type RsvpStatus } from '../features/admin/useAdminData'
 import {
@@ -444,6 +445,176 @@ function RsvpDetailModal({ row, onClose, onSaved }: RsvpDetailModalProps) {
   )
 }
 
+// ─── Shared row pieces (table + cards) ────────────────────────────────────────
+
+interface RowCallbacks {
+  onEditInvitation: (row: AdminRow) => void
+  onEditRsvp: (row: AdminRow) => void
+}
+
+/** Guest list with attendance dots plus the people count. */
+function GuestLines({ row }: { row: AdminRow }) {
+  const attendingGuests = row.rsvp?.guests.filter((g: GuestEntry) => g.attending) ?? []
+  const notAttending = row.rsvp?.guests.filter((g: GuestEntry) => !g.attending) ?? []
+  return (
+    <>
+      <div className="space-y-0.5">
+        {row.rsvp ? (
+          <>
+            {attendingGuests.map((g: GuestEntry) => (
+              <div key={g.name} className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-terra-400 shrink-0" />
+                <span className="text-stone-700">{g.name}</span>
+              </div>
+            ))}
+            {notAttending.map((g: GuestEntry) => (
+              <div key={g.name} className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-stone-300 shrink-0" />
+                <span className="text-stone-400 line-through">{g.name}</span>
+              </div>
+            ))}
+          </>
+        ) : (
+          row.guests.map((name) => (
+            <div key={name} className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-stone-200 shrink-0" />
+              <span className="text-stone-600">{name}</span>
+            </div>
+          ))
+        )}
+      </div>
+      <p className="text-stone-400 text-xs mt-1">
+        {row.guests.length} persona{row.guests.length !== 1 ? 's' : ''}
+      </p>
+    </>
+  )
+}
+
+/**
+ * Dietary restrictions a guest wrote when answering (guest.message inside the RSVP).
+ * Not to be confused with row.message, the couple's own note on the invitation.
+ */
+function dietaryNotes(row: AdminRow): GuestEntry[] {
+  return row.rsvp?.guests.filter((g: GuestEntry) => (g.message ?? '').trim() !== '') ?? []
+}
+
+function NoteLine({ guest }: { guest: GuestEntry }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-xs text-dusty-500">{guest.name}</p>
+      <p className="text-dusty-700 leading-snug">{guest.message}</p>
+    </div>
+  )
+}
+
+/** The restrictions: a column of their own in the table, a labelled block in the cards. */
+function DietaryNotes({ row, labelled = false }: { row: AdminRow; labelled?: boolean }) {
+  const notes = dietaryNotes(row)
+
+  if (notes.length === 0) {
+    // Discreet in the table, absent altogether in the cards.
+    return labelled ? null : <span className="text-stone-300">—</span>
+  }
+
+  if (labelled) {
+    return (
+      <div className="rounded-xl bg-dusty-50 px-3 py-2.5 space-y-2">
+        <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-dusty-500">
+          <Utensils size={13} />
+          Restricciones alimentarias
+        </p>
+        {notes.map((g) => (
+          <NoteLine key={g.name} guest={g} />
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {notes.map((g) => (
+        <div key={g.name} className="flex items-start gap-1.5 rounded-lg bg-dusty-50 px-2 py-1.5">
+          <Utensils size={13} className="text-dusty-400 shrink-0 mt-1" />
+          <NoteLine guest={g} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** Edit-invitation / edit-RSVP pair: icon-only in the table, labelled in the cards. */
+function RowActions({
+  row,
+  onEditInvitation,
+  onEditRsvp,
+  labelled = false,
+}: RowCallbacks & { row: AdminRow; labelled?: boolean }) {
+  if (labelled) {
+    return (
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => onEditInvitation(row)}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl border border-stone-200 text-xs sm:text-sm font-medium text-stone-600 whitespace-nowrap hover:bg-stone-50 transition"
+        >
+          <Edit2 size={15} />
+          Editar invitación
+        </button>
+        <button
+          type="button"
+          onClick={() => onEditRsvp(row)}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl border border-terra-100 bg-terra-50 text-xs sm:text-sm font-medium text-terra-700 whitespace-nowrap hover:bg-terra-100 transition"
+        >
+          <CheckCircle size={15} />
+          Modificar RSVP
+        </button>
+      </div>
+    )
+  }
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => onEditInvitation(row)}
+        className="p-2 rounded-lg text-stone-400 hover:text-dusty-600 hover:bg-dusty-50 transition"
+        title="Editar invitación"
+      >
+        <Edit2 size={15} />
+      </button>
+      <button
+        type="button"
+        onClick={() => onEditRsvp(row)}
+        className="p-2 rounded-lg text-stone-400 hover:text-terra-600 hover:bg-terra-50 transition"
+        title="Modificar RSVP"
+      >
+        <CheckCircle size={15} />
+      </button>
+    </div>
+  )
+}
+
+/** One invitation as a card: the table is unreadable below md:. */
+function InvitationCard({ row, ...callbacks }: RowCallbacks & { row: AdminRow }) {
+  return (
+    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <span className="font-mono text-sm text-stone-800 font-medium break-words">{row.code}</span>
+        <StatusBadge status={row.status} />
+      </div>
+      <div className="text-sm">
+        <GuestLines row={row} />
+      </div>
+      <DietaryNotes row={row} labelled />
+      {row.message && (
+        <p className="text-xs text-stone-400 border-l-2 border-stone-100 pl-3 line-clamp-2">
+          {row.message}
+        </p>
+      )}
+      <RowActions row={row} labelled {...callbacks} />
+    </div>
+  )
+}
+
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────
 
 type SortKey = 'code' | 'status' | 'guests'
@@ -534,6 +705,11 @@ function AdminDashboard() {
     (r) => r.rsvp && (r.rsvp.guests as GuestEntry[]).some((g) => !g.attending),
   ).length
 
+  const rowCallbacks: RowCallbacks = {
+    onEditInvitation: (row) => setInvitationModal({ open: true, row }),
+    onEditRsvp: (row) => setRsvpDetailModal({ open: true, row }),
+  }
+
   const handleModalSaved = () => {
     setInvitationModal({ open: false, row: null })
     setRsvpDetailModal({ open: false, row: null })
@@ -543,8 +719,8 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Header */}
-      <div className="bg-white border-b border-stone-100 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <div className="bg-white border-b border-stone-100 px-4 sm:px-6 py-4">
+        <div className="max-w-6xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div>
             <h1 className="font-heading text-2xl text-stone-800">Panel de Invitaciones</h1>
             <p className="text-stone-500 text-sm mt-0.5">Pablo & May · 29 enero 2027</p>
@@ -554,7 +730,7 @@ function AdminDashboard() {
               type="button"
               onClick={refresh}
               disabled={isLoading}
-              className="p-2.5 border border-stone-200 rounded-lg text-stone-500 hover:bg-stone-50 transition disabled:opacity-40"
+              className="shrink-0 p-2.5 border border-stone-200 rounded-lg text-stone-500 hover:bg-stone-50 transition disabled:opacity-40"
               title="Refrescar"
             >
               <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
@@ -562,7 +738,7 @@ function AdminDashboard() {
             <button
               type="button"
               onClick={() => setInvitationModal({ open: true, row: null })}
-              className="inline-flex items-center gap-2 py-2.5 px-4 bg-dusty-600 text-white rounded-lg text-sm font-medium hover:bg-dusty-700 transition"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-dusty-600 text-white rounded-lg text-sm font-medium whitespace-nowrap hover:bg-dusty-700 transition"
             >
               <Plus size={16} />
               Nueva invitación
@@ -571,7 +747,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
           {[
@@ -663,140 +839,109 @@ function AdminDashboard() {
           </span>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
-          {isLoading && rows.length === 0 ? (
-            <div className="py-16 flex flex-col items-center gap-3 text-stone-400">
-              <Loader2 size={28} className="animate-spin" />
-              <p className="text-sm">Cargando invitaciones...</p>
+        {/* Sort (below md:, where the clickable table headers are not rendered) */}
+        <div className="flex items-center gap-2 flex-wrap md:hidden">
+          <span className="text-sm text-stone-500 mr-1">Ordenar:</span>
+          {(
+            [
+              { key: 'code', label: 'Código' },
+              { key: 'guests', label: 'Invitados' },
+              { key: 'status', label: 'Estado' },
+            ] as { key: SortKey; label: string }[]
+          ).map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => handleSort(key)}
+              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                sortKey === key
+                  ? 'bg-dusty-100 text-dusty-700 border border-dusty-200'
+                  : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+              }`}
+            >
+              {label}
+              <SortIcon active={sortKey === key} dir={sortDir} />
+            </button>
+          ))}
+        </div>
+
+        {/* Invitation list: cards below md:, the table from md: up */}
+        {isLoading && rows.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm py-16 flex flex-col items-center gap-3 text-stone-400">
+            <Loader2 size={28} className="animate-spin" />
+            <p className="text-sm">Cargando invitaciones...</p>
+          </div>
+        ) : sorted.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm py-16 text-center text-stone-400 text-sm">
+            No hay invitaciones{filterStatus !== 'all' ? ' con este filtro' : ''}
+          </div>
+        ) : (
+          <>
+            {/* Cards (below md:) */}
+            <div className="md:hidden space-y-3">
+              {sorted.map((row) => (
+                <InvitationCard key={row.id} row={row} {...rowCallbacks} />
+              ))}
             </div>
-          ) : sorted.length === 0 ? (
-            <div className="py-16 text-center text-stone-400 text-sm">
-              No hay invitaciones{filterStatus !== 'all' ? ' con este filtro' : ''}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-stone-50 border-b border-stone-100 text-left">
-                    {(
-                      [
-                        { key: 'code', label: 'Código' },
-                        { key: 'guests', label: 'Invitados' },
-                        { key: null, label: 'Mensaje' },
-                        { key: 'status', label: 'Estado' },
-                        { key: null, label: 'Acciones' },
-                      ] as { key: SortKey | null; label: string }[]
-                    ).map(({ key, label }) => (
-                      <th
-                        key={label}
-                        className={`px-4 py-3 text-xs font-medium text-stone-500 uppercase tracking-wide whitespace-nowrap ${
-                          key ? 'cursor-pointer hover:text-stone-800 select-none' : ''
-                        }`}
-                        onClick={key ? () => handleSort(key) : undefined}
-                      >
-                        <span className="inline-flex items-center gap-1">
-                          {label}
-                          {key && (
-                            <SortIcon active={sortKey === key} dir={sortDir} />
-                          )}
-                        </span>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-50">
-                  {sorted.map((row) => {
-                    const attendingGuests =
-                      row.rsvp?.guests.filter((g: GuestEntry) => g.attending) ?? []
-                    const notAttending =
-                      row.rsvp?.guests.filter((g: GuestEntry) => !g.attending) ?? []
-                    return (
+
+            {/* Table (md: and up) */}
+            <div className="hidden md:block bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-stone-50 border-b border-stone-100 text-left">
+                      {(
+                        [
+                          { key: 'code', label: 'Código' },
+                          { key: 'guests', label: 'Invitados' },
+                          { key: null, label: 'Restricciones' },
+                          { key: 'status', label: 'Estado' },
+                          { key: null, label: 'Acciones' },
+                        ] as { key: SortKey | null; label: string }[]
+                      ).map(({ key, label }) => (
+                        <th
+                          key={label}
+                          className={`px-4 py-3 text-xs font-medium text-stone-500 uppercase tracking-wide whitespace-nowrap ${
+                            key ? 'cursor-pointer hover:text-stone-800 select-none' : ''
+                          }`}
+                          onClick={key ? () => handleSort(key) : undefined}
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            {label}
+                            {key && (
+                              <SortIcon active={sortKey === key} dir={sortDir} />
+                            )}
+                          </span>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-50">
+                    {sorted.map((row) => (
                       <tr key={row.id} className="hover:bg-stone-50 transition-colors">
                         <td className="px-4 py-3 font-mono text-stone-800 font-medium whitespace-nowrap">
                           {row.code}
                         </td>
                         <td className="px-4 py-3">
-                          <div className="space-y-0.5">
-                            {row.rsvp ? (
-                              <>
-                                {attendingGuests.map((g: GuestEntry) => (
-                                  <div key={g.name} className="flex items-start gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-terra-400 shrink-0 mt-1.5" />
-                                    <div>
-                                      <span className="text-stone-700">{g.name}</span>
-                                      {g.message && (
-                                        <p className="text-xs text-dusty-600 bg-dusty-50 rounded px-1.5 py-0.5 mt-0.5 inline-block">
-                                          {g.message}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
-                                {notAttending.map((g: GuestEntry) => (
-                                  <div
-                                    key={g.name}
-                                    className="flex items-center gap-1.5"
-                                  >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-stone-300 shrink-0" />
-                                    <span className="text-stone-400 line-through">{g.name}</span>
-                                  </div>
-                                ))}
-                              </>
-                            ) : (
-                              row.guests.map((name) => (
-                                <div key={name} className="flex items-center gap-1.5">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-stone-200 shrink-0" />
-                                  <span className="text-stone-600">{name}</span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                          <p className="text-stone-400 text-xs mt-1">
-                            {row.guests.length} persona{row.guests.length !== 1 ? 's' : ''}
-                          </p>
+                          <GuestLines row={row} />
                         </td>
-                        <td className="px-4 py-3 text-stone-500 max-w-[160px]">
-                          <span
-                            className="block truncate"
-                            title={row.message}
-                          >
-                            {row.message || '—'}
-                          </span>
+                        <td className="px-4 py-3 text-sm max-w-[180px]">
+                          <DietaryNotes row={row} />
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <StatusBadge status={row.status} />
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setInvitationModal({ open: true, row: row as InvitationRow })
-                              }
-                              className="p-2 rounded-lg text-stone-400 hover:text-dusty-600 hover:bg-dusty-50 transition"
-                              title="Editar invitación"
-                            >
-                              <Edit2 size={15} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setRsvpDetailModal({ open: true, row })}
-                              className="p-2 rounded-lg text-stone-400 hover:text-terra-600 hover:bg-terra-50 transition"
-                              title="Modificar RSVP"
-                            >
-                              <CheckCircle size={15} />
-                            </button>
-                          </div>
+                          <RowActions row={row} {...rowCallbacks} />
                         </td>
                       </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Modals */}
