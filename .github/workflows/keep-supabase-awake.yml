@@ -32,13 +32,57 @@ jobs:
             exit 1
           fi
 
+          # Copiar un valor desde .env suele arrastrar las comillas o un salto de
+          # línea, y eso basta para que la cabecera salga inválida. Se limpian en
+          # vez de fallar por algo que no se ve a simple vista.
+          limpiar() {
+            printf '%s' "$1" \
+              | tr -d '\r\n' \
+              | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
+                    -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'\$//"
+          }
+
+          url=$(limpiar "${SUPABASE_URL}")
+          key=$(limpiar "${SUPABASE_ANON_KEY}")
+          url=${url%/}
+
+          # Diagnóstico sin exponer la key: solo su largo y a qué familia pertenece.
+          proyecto=$(printf '%s' "${url}" | sed -E 's#^https?://([^.]+)\..*#\1#')
+          echo "SUPABASE_URL apunta al proyecto: ${proyecto}"
+          echo "Largo de la API key: ${#key} caracteres"
+
+          case "${key}" in
+            eyJ*)
+              echo "Formato de la key: JWT anon, correcto." ;;
+            sb_publishable_*)
+              echo "Formato de la key: publishable, correcto." ;;
+            sb_secret_*|service_role*)
+              echo "Formato de la key: es una key SECRETA. Acá va la anon/publishable, la misma que usa la app en el navegador."
+              exit 1 ;;
+            http*)
+              echo "Formato de la key: parece una URL. Seguramente se pegó el valor equivocado en el secret."
+              exit 1 ;;
+            *)
+              echo "Formato de la key: no reconocido. Debería empezar con 'eyJ' o con 'sb_publishable_'." ;;
+          esac
+
           # Tiene que ser una consulta real a una tabla: llamar solo a la raíz de
           # la API responde sin tocar Postgres y no cuenta como actividad.
           codigo=$(curl --silent --show-error --max-time 30 \
             --output respuesta.txt --write-out '%{http_code}' \
-            "${SUPABASE_URL}/rest/v1/invitations?select=code&limit=1" \
-            --header "apikey: ${SUPABASE_ANON_KEY}" \
-            --header "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+            "${url}/rest/v1/invitations?select=code&limit=1" \
+            --header "apikey: ${key}" \
+            --header "Authorization: Bearer ${key}")
+
+          if [ "${codigo}" = "401" ] || [ "${codigo}" = "403" ]; then
+            echo "Supabase rechazó la key (HTTP ${codigo}):"
+            cat respuesta.txt
+            echo
+            echo "La base está despierta, el problema es el secret. Comprobá que:"
+            echo "  - SUPABASE_ANON_KEY sea el mismo valor que VITE_SUPABASE_ANON_KEY del .env"
+            echo "  - ese valor corresponda al proyecto '${proyecto}' y no a otro"
+            exit 1
+          fi
 
           if [ "${codigo}" != "200" ]; then
             echo "La base no respondió como se esperaba (HTTP ${codigo}):"
