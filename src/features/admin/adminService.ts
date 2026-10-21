@@ -73,15 +73,22 @@ export async function deleteInvitation(
   return { success: true }
 }
 
+/**
+ * Una sola escritura, apoyada en la restricción `unique_invitation_code`.
+ *
+ * Antes esto borraba la fila y la insertaba de nuevo, porque la tabla no tenía
+ * política RLS de UPDATE para anon. Además de la ventana en la que un fallo
+ * dejaba al invitado sin respuesta, cada corrección desde el panel estrenaba
+ * `created_at` y se perdía la fecha real de confirmación. Al no tocar esa
+ * columna, ahora sobrevive; de `updated_at` se encarga un trigger.
+ */
 export async function upsertRsvp(
   code: string,
   guests: GuestEntry[],
 ): Promise<{ success: boolean; error?: string }> {
-  await supabase.from('rsvp_confirmations').delete().eq('invitation_code', code)
-
   const { error } = await supabase
     .from('rsvp_confirmations')
-    .insert({ invitation_code: code, guests })
+    .upsert({ invitation_code: code, guests }, { onConflict: 'invitation_code' })
 
   if (error) return { success: false, error: error.message }
   return { success: true }
