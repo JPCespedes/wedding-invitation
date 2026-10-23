@@ -723,7 +723,7 @@ function AdminDashboard() {
         <div className="max-w-6xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div>
             <h1 className="font-heading text-2xl text-stone-800">Panel de Invitaciones</h1>
-            <p className="text-stone-500 text-sm mt-0.5">Pablo & May · 29 enero 2027</p>
+            <p className="text-stone-500 text-sm mt-0.5">May & Pablo · 29 enero 2027</p>
           </div>
           <div className="flex gap-2">
             <button

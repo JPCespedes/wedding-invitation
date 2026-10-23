@@ -168,7 +168,7 @@ export function Hero() {
               muted
               playsInline
               preload="auto"
-              aria-label={`${groomName} y ${brideName} en su sesión de compromiso`}
+              aria-label={`${brideName} y ${groomName} en su sesión de compromiso`}
               className={videoLayer}
               style={{ opacity: 1, transitionDuration: `${FADE_MS}ms` }}
             />
@@ -221,7 +221,7 @@ export function Hero() {
             </div>
 
             <h1 className="font-script text-6xl sm:text-7xl lg:text-[5.5rem] xl:text-[6.5rem] font-normal leading-[1.02] lg:whitespace-nowrap mt-2.5 text-white drop-shadow-[0_2px_18px_rgba(17,42,67,0.55)] lg:text-stone-800 lg:drop-shadow-none">
-              {groomName} &amp; {brideName}
+              {brideName} &amp; {groomName}
             </h1>
 
             <div className="flex items-center gap-3.5 mt-5 lg:mt-6">

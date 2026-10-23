@@ -4,7 +4,7 @@ import { invitationData } from '../data/invitation'
 type Event = (typeof invitationData.events)[number]
 
 const eventTitle = (event: Event) =>
-  `Boda de ${invitationData.couple.groomName} y ${invitationData.couple.brideName} (${event.title})`
+  `Boda de ${invitationData.couple.brideName} y ${invitationData.couple.groomName} (${event.title})`
 
 /**
  * Genera URL para agregar evento a Google Calendar

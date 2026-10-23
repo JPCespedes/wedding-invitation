@@ -175,7 +175,7 @@ export function Footer() {
             transition={{ duration: 0.7, ease: 'easeOut' }}
           >
             <p className="font-script text-5xl sm:text-6xl md:text-7xl text-stone-800 leading-[1.06]">
-              {couple.groomName} &amp; {couple.brideName}
+              {couple.brideName} &amp; {couple.groomName}
             </p>
             <div className="flex items-center gap-3.5 mt-4">
               <span className="block w-10 h-px bg-gradient-to-r from-transparent to-gold-500 md:hidden" />
@@ -243,7 +243,7 @@ export function Footer() {
           transition={{ duration: 0.8 }}
         >
           <span className="font-script text-3xl leading-none text-white/70" aria-hidden>
-            P&amp;M
+            M&amp;P
           </span>
           <p className="text-white/90 text-sm">
             Built with code, coffee &amp; AI · Pablo Cespedes

@@ -55,7 +55,7 @@ export function AudioGate() {
               Bienvenidos a la invitación de
             </p>
             <h1 className="font-script text-5xl md:text-6xl text-stone-800 leading-tight">
-              {groomName} &amp; {brideName}
+              {brideName} &amp; {groomName}
             </h1>
             <div className="flex items-center justify-center gap-3.5 mt-4 mb-5">
               <span className="block w-11 h-px bg-gradient-to-r from-transparent to-gold-500" />

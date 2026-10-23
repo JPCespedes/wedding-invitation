@@ -6,6 +6,12 @@ export const invitationData = {
    * Ej: cant-help-falling-in-love.mp3
    */
   audioSrc: `${base}audio/el-poder-de-tu-amor.mp3`,
+  /**
+   * Los campos guardan quién es quién, pero el orden de lectura es el
+   * contrario: en todo el sitio el nombre de la novia va primero, «May &
+   * Pablo». Vale para la portada, la pantalla de bienvenida, el cierre, el
+   * título de la pestaña, los eventos de calendario y el panel.
+   */
   couple: {
     groomName: 'Pablo',
     brideName: 'May',
