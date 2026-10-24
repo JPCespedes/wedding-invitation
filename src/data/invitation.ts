@@ -19,6 +19,13 @@ export const invitationData = {
     quote:
       'A partir del 29 de enero de 2027 nuestras vidas se unen para siempre y queremos que nos acompañés en el inicio del nuevo camino.',
   },
+  /**
+   * Fecha límite para confirmar. Se muestra junto al botón, dentro del
+   * formulario y en las preguntas frecuentes, pero no se hace cumplir: el
+   * sitio sigue aceptando respuestas después, porque más vale una
+   * confirmación tardía que ninguna.
+   */
+  rsvpDeadline: '20 de diciembre',
   events: [
     {
       id: 'ceremonia',

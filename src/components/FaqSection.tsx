@@ -6,6 +6,11 @@ import { FloralSpray } from './ornaments/FloralSpray'
 
 const faqs = [
   {
+    question: '¿Hasta cuándo puedo confirmar?',
+    answer:
+      'Te pedimos confirmar a más tardar el 20 de diciembre de 2026, para poder cerrar números con el lugar y la comida. Si confirmás y después te cambia algo, podés volver a entrar a tu invitación y modificarlo.',
+  },
+  {
     question: '¿Puedo llevar acompañante?',
     answer:
       'Nos encantaría poder recibir a todos, pero lamentablemente el cupo es limitado. Las invitaciones fueron pensadas con mucho cariño para cada persona, así que agradecemos tu comprensión.',

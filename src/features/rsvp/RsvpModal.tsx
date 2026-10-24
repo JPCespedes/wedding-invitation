@@ -7,6 +7,7 @@ import { useAppStore } from '../../store/useAppStore'
 import { rsvpSchema, type RsvpFormValues, type GuestEntry } from './rsvpSchema'
 import { saveRsvp } from './useGoogleFormSubmit'
 import { useInvitation } from './useInvitation'
+import { invitationData } from '../../data/invitation'
 import { useRsvpStatus, describeAttendance } from './useRsvpStatus'
 
 /**
@@ -321,8 +322,8 @@ export function RsvpModal() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
             <p className="text-xs text-stone-500 mb-1">
               {isConfirmed
-                ? 'Cambiá lo que necesités y guardá: reemplaza la respuesta anterior.'
-                : 'Indicá quién asiste y dejá un mensaje individual si es necesario.'}
+                ? `Cambiá lo que necesités y guardá: reemplaza la respuesta anterior. Podés hacerlo hasta el ${invitationData.rsvpDeadline}.`
+                : `Indicá quién asiste y dejá un mensaje individual si es necesario. Te pedimos confirmar antes del ${invitationData.rsvpDeadline}.`}
             </p>
 
             <div className="space-y-3">

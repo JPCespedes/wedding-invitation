@@ -1,5 +1,6 @@
 import { CheckCircle, PencilLine } from 'lucide-react'
 import { useAppStore } from '../../store/useAppStore'
+import { invitationData } from '../../data/invitation'
 import { useRsvpStatus, describeAttendance } from './useRsvpStatus'
 
 /**
@@ -41,6 +42,11 @@ export function RsvpCta({ variant = 'card' }: { variant?: 'card' | 'footer' }) {
             Modificar
           </span>
         </span>
+        {/* A quien ya confirmó la fecha no le sirve como plazo para responder,
+            sino para saber hasta cuándo puede cambiar lo que respondió. */}
+        <span className="block text-[11px] text-stone-400 mt-1.5">
+          Podés cambiarla hasta el {invitationData.rsvpDeadline}
+        </span>
       </button>
     )
   }
@@ -49,20 +55,27 @@ export function RsvpCta({ variant = 'card' }: { variant?: 'card' | 'footer' }) {
     variant === 'footer' ? 'Confirmar asistencia a celebración' : 'Confirmar asistencia'
 
   return (
-    <button
-      type="button"
-      onClick={open}
-      // Mientras se consulta el estado el botón sigue siendo pulsable: el modal
-      // también espera la respuesta, así que nadie llega a una pantalla errónea.
-      aria-busy={!isLoaded}
-      className={
-        variant === 'footer'
-          ? 'inline-flex items-center justify-center gap-2 py-3.5 px-5 bg-terra-500 text-white rounded-lg text-sm font-medium hover:bg-terra-600 transition shadow-[0_2px_8px_rgba(173,85,49,0.3)]'
-          : 'w-full py-3 px-4 bg-terra-500 text-white rounded-lg font-medium hover:bg-terra-600 transition shadow-[0_2px_8px_rgba(173,85,49,0.28)]'
-      }
-    >
-      {variant === 'footer' && <CheckCircle size={18} />}
-      {label}
-    </button>
+    <div className={variant === 'footer' ? '' : 'w-full'}>
+      <button
+        type="button"
+        onClick={open}
+        // Mientras se consulta el estado el botón sigue siendo pulsable: el modal
+        // también espera la respuesta, así que nadie llega a una pantalla errónea.
+        aria-busy={!isLoaded}
+        className={
+          variant === 'footer'
+            ? 'inline-flex items-center justify-center gap-2 py-3.5 px-5 bg-terra-500 text-white rounded-lg text-sm font-medium hover:bg-terra-600 transition shadow-[0_2px_8px_rgba(173,85,49,0.3)]'
+            : 'w-full py-3 px-4 bg-terra-500 text-white rounded-lg font-medium hover:bg-terra-600 transition shadow-[0_2px_8px_rgba(173,85,49,0.28)]'
+        }
+      >
+        {variant === 'footer' && <CheckCircle size={18} />}
+        {label}
+      </button>
+      {/* El plazo va pegado al botón porque el momento en que alguien decide
+          dejarlo «para después» es justo este, no cuando abre el formulario. */}
+      <p className="text-[11px] text-stone-500 text-center mt-1.5">
+        Confirmá antes del {invitationData.rsvpDeadline}
+      </p>
+    </div>
   )
 }
