@@ -31,7 +31,8 @@ export const invitationData = {
       id: 'ceremonia',
       title: 'Ceremonia',
       datetimeISO: '2027-01-29T14:30:00',
-      durationHours: 2,
+      // De 2:30 a 4:00 p.m.
+      durationHours: 1.5,
       venueName: 'Parroquia Santa Ana',
       address: 'Santa Ana',
       mapsQuery: "9.9324436,-84.1805954"
