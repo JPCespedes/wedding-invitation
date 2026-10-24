@@ -243,7 +243,7 @@ export function Hero() {
               className="inline-flex flex-col items-center gap-1.5 mt-8 lg:mt-10 lg:flex-row lg:gap-2.5 text-white/70 hover:text-white lg:text-dusty-600 lg:hover:text-dusty-700 transition"
               aria-label="Ver el resto de la invitación"
             >
-              <span className="text-[11px] uppercase tracking-[0.22em]">Descubre más</span>
+              <span className="text-[11px] uppercase tracking-[0.22em]">Descubrí más</span>
               <motion.span
                 animate={{ y: [0, 6, 0] }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}

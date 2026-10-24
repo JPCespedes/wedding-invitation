@@ -11,7 +11,7 @@ const faqs = [
       'Nos encantaría poder recibir a todos, pero lamentablemente el cupo es limitado. Las invitaciones fueron pensadas con mucho cariño para cada persona, así que agradecemos tu comprensión.',
   },
   {
-    question: '¿Puedo traspasar mi entrada a otra persona?',
+    question: '¿Puedo traspasar mi invitación a otra persona?',
     answer:
       'Cada invitación fue hecha especialmente para vos. Si por alguna razón no podés asistir, te pedimos que nos avises, pero no es posible transferirla a alguien más.',
   },

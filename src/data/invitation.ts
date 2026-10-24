@@ -17,7 +17,7 @@ export const invitationData = {
     brideName: 'May',
     dateISO: '2027-01-29T14:30:00',
     quote:
-      'A partir del 29 de enero de 2027 nuestras vidas se unen para siempre y queremos que nos acompañes en el inicio del nuevo camino.',
+      'A partir del 29 de enero de 2027 nuestras vidas se unen para siempre y queremos que nos acompañés en el inicio del nuevo camino.',
   },
   events: [
     {
@@ -161,10 +161,10 @@ export const invitationData = {
       'Amamos a los pequeños de la familia, pero la celebración será exclusivamente para adultos. ¡Los niños son bienvenidos en la ceremonia!',
       'Contamos con servicio de descorche, así que si querés llevar tu bebida favorita para brindar, ¡adelante!',
       'El lugar dispone de estacionamiento para tu comodidad.',
-      'El venue cuenta con un hotel boutique donde podrías hospedarte. ¡Consultá por tarifas especiales!',
+      'El lugar cuenta con un hotel boutique donde podrías hospedarte. ¡Consultá por tarifas especiales!',
     ],
     songPrompt:
-      '¿Cuál es la canción que no debe faltar en la PlayList de la fiesta?',
+      '¿Cuál es la canción que no debe faltar en la playlist de la fiesta?',
   },
   gifts: {
     text: 'Si deseas regalarnos algo más que tu hermosa presencia, agradecemos contribuciones para nuestro hogar.\n\nCliente: JOSE PABLO CESPEDES CASTRO\nColones\nNúmero de cuenta BAC: 704133529\nNúmero de cuenta IBAN: CR91010200007041335293\n\nDólares\nNúmero de cuenta BAC: 704133222\nNúmero de cuenta IBAN: CR89010200007041332225\n\nSinpe Móvil: 86443226',

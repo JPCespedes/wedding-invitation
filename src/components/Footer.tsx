@@ -246,7 +246,7 @@ export function Footer() {
             M&amp;P
           </span>
           <p className="text-white/90 text-sm">
-            Built with code, coffee &amp; AI · Pablo Cespedes
+            Built with code, coffee &amp; AI · Pablo Céspedes
           </p>
           <a
             href="https://www.linkedin.com/in/jose-pablo-cespedes-castro-640242ba/"
