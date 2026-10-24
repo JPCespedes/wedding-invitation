@@ -6,12 +6,16 @@ type Event = (typeof invitationData.events)[number]
 const eventTitle = (event: Event) =>
   `Boda de ${invitationData.couple.brideName} y ${invitationData.couple.groomName} (${event.title})`
 
+/** Cada evento dura lo suyo: la ceremonia no ocupa lo mismo que la fiesta. */
+const endOf = (event: Event) =>
+  new Date(new Date(event.datetimeISO).getTime() + event.durationHours * 60 * 60 * 1000)
+
 /**
  * Genera URL para agregar evento a Google Calendar
  */
 export function getGoogleCalendarUrl(event: Event): string {
   const start = new Date(event.datetimeISO)
-  const end = new Date(start.getTime() + 2 * 60 * 60 * 1000) // +2h por defecto
+  const end = endOf(event)
   const params = new URLSearchParams({
     action: 'TEMPLATE',
     text: eventTitle(event),
@@ -27,7 +31,7 @@ export function getGoogleCalendarUrl(event: Event): string {
  */
 export function getIcsContent(event: Event): string {
   const start = new Date(event.datetimeISO)
-  const end = new Date(start.getTime() + 2 * 60 * 60 * 1000)
+  const end = endOf(event)
   const now = new Date()
   const formatIcs = (d: Date) =>
     d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')

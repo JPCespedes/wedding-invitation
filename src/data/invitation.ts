@@ -31,6 +31,7 @@ export const invitationData = {
       id: 'ceremonia',
       title: 'Ceremonia',
       datetimeISO: '2027-01-29T14:30:00',
+      durationHours: 2,
       venueName: 'Parroquia Santa Ana',
       address: 'Santa Ana',
       mapsQuery: "9.9324436,-84.1805954"
@@ -39,6 +40,8 @@ export const invitationData = {
       id: 'celebracion',
       title: 'Celebración',
       datetimeISO: '2027-01-29T17:30:00',
+      // De 5:30 p.m. a 10:30 p.m.: es lo que el invitado bloquea en su agenda.
+      durationHours: 5,
       venueName: 'El Rodeo Estancia',
       address: 'Belén',
       mapsQuery: "9.9767325,-84.199894"
