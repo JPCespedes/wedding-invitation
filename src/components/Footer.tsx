@@ -112,7 +112,7 @@ export function Footer() {
         <div className="relative max-w-xl md:max-w-3xl mx-auto">
           <SectionHeading
             eyebrow="Gracias por tanto"
-            title="Regalos"
+            title="Lluvia de sobres"
             subtitle="Con tenerte ahí ya nos basta y nos sobra, pero cualquier muestra de cariño nos llega al corazón."
             className="mb-8"
           />
