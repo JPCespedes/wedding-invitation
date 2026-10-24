@@ -55,7 +55,7 @@ export function RsvpCta({ variant = 'card' }: { variant?: 'card' | 'footer' }) {
     variant === 'footer' ? 'Confirmar asistencia a celebración' : 'Confirmar asistencia'
 
   return (
-    <div className={variant === 'footer' ? '' : 'w-full'}>
+    <div className="w-full">
       <button
         type="button"
         onClick={open}
@@ -64,7 +64,7 @@ export function RsvpCta({ variant = 'card' }: { variant?: 'card' | 'footer' }) {
         aria-busy={!isLoaded}
         className={
           variant === 'footer'
-            ? 'inline-flex items-center justify-center gap-2 py-3.5 px-5 bg-terra-500 text-white rounded-lg text-sm font-medium hover:bg-terra-600 transition shadow-[0_2px_8px_rgba(173,85,49,0.3)]'
+            ? 'flex w-full items-center justify-center gap-2 py-3.5 px-5 bg-terra-500 text-white rounded-lg text-sm font-medium hover:bg-terra-600 transition shadow-[0_2px_8px_rgba(173,85,49,0.3)]'
             : 'w-full py-3 px-4 bg-terra-500 text-white rounded-lg font-medium hover:bg-terra-600 transition shadow-[0_2px_8px_rgba(173,85,49,0.28)]'
         }
       >
