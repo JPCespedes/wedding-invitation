@@ -27,3 +27,6 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Estado local del CLI de Supabase (proyecto vinculado, versión del CLI)
+supabase/.temp/
