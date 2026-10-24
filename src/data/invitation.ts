@@ -187,8 +187,9 @@ export const invitationData = {
     songFieldEntry: 'entry.71187672', // Para pre-fill si se usa en el futuro
   },
   /**
-   * Listas de invitados por código. Compartí el link con ?invitacion=CODIGO
-   * Ej: tusitio.com?invitacion=garcia → muestra la lista "garcia"
+   * Listas de invitados por código. Compartí el link con el código en la ruta.
+   * Ej: tusitio.com/garcia → muestra la lista "garcia"
+   * También sigue funcionando el formato viejo, tusitio.com?invitacion=garcia.
    */
   guestLists: {
     garcia: {

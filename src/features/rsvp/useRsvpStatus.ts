@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useAppStore } from '../../store/useAppStore'
 
 /**
@@ -11,8 +11,13 @@ import { useAppStore } from '../../store/useAppStore'
  * está consultando: a quien ya confirmó le parpadearía el estado equivocado.
  */
 export function useRsvpStatus() {
+  const { codigo } = useParams()
   const [searchParams] = useSearchParams()
-  const code = searchParams.get('invitacion')?.toLowerCase().trim() || null
+
+  // El código viaja en la ruta («/cami-andres»), que es la forma que se
+  // reparte. Se sigue aceptando «?invitacion=cami-andres» porque es el formato
+  // con el que salieron los primeros links y esos ya están en manos de la gente.
+  const code = (codigo ?? searchParams.get('invitacion'))?.toLowerCase().trim() || null
 
   const confirmedGuests = useAppStore((s) => s.confirmedGuests)
   const rsvpStatus = useAppStore((s) => s.rsvpStatus)

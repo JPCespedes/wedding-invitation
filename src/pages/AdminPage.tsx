@@ -200,7 +200,7 @@ function InvitationModal({ initial, onClose, onSaved }: InvitationModalProps) {
             />
             {!isEdit && (
               <p className="text-xs text-stone-400 mt-1">
-                Link de invitación: <strong>?invitacion={code || 'codigo'}</strong>
+                Link de invitación: <strong>/{code || 'codigo'}</strong>
               </p>
             )}
           </div>
