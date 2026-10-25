@@ -30,3 +30,6 @@ npm-debug.log*
 
 # Estado local del CLI de Supabase (proyecto vinculado, versión del CLI)
 supabase/.temp/
+
+# Mensajes con nombres y links de los invitados: no va al repositorio
+mensajes-invitaciones.txt
